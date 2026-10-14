@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="As notícias mais importantes do dia nos mercados, em posts curtos com explicações simples.">
+<title>Daily Alpha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: fita de cotações no topo, depois feed de posts curtos (coluna principal) + painel lateral com números e termo do dia; numa só coluna no telemóvel */
+:root{
+  --bg:#eef2f6; --surface:#ffffff; --ink:#0d1726; --muted:#596579; --line:#d9e0ea;
+  --accent:#1d4ed8; --accent-soft:#e3eaff;
+  --up:#0b7a46; --up-soft:#dcf3e6; --down:#c8323a; --down-soft:#fbe3e4; --flat:#8a6a00; --flat-soft:#fbf0cf;
+  --tape:#0d1726; --tape-fg:#e8eef8;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b111b; --surface:#131c2a; --ink:#e6ecf5; --muted:#93a0b4; --line:#243145;
+  --accent:#7aa2ff; --accent-soft:#1b2a4d;
+  --up:#4fd18e; --up-soft:#11301f; --down:#ff7b80; --down-soft:#3a1619; --flat:#f0c75a; --flat-soft:#352a0b;
+  --tape:#050a12; --tape-fg:#dfe7f3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b111b; --surface:#131c2a; --ink:#e6ecf5; --muted:#93a0b4; --line:#243145;
+  --accent:#7aa2ff; --accent-soft:#1b2a4d;
+  --up:#4fd18e; --up-soft:#11301f; --down:#ff7b80; --down-soft:#3a1619; --flat:#f0c75a; --flat-soft:#352a0b;
+  --tape:#050a12; --tape-fg:#dfe7f3; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* Fita */
+.tape{background:var(--tape);color:var(--tape-fg);overflow:hidden;font-family:var(--f-mono);font-size:13px;white-space:nowrap}
+.tape-track{display:inline-flex;gap:32px;padding-block:9px;padding-left:16px;animation:tape 45s linear infinite}
+.tape:hover .tape-track{animation-play-state:paused}
+.tape-item{display:inline-flex;gap:8px;align-items:baseline}
+.tape-item b{font-weight:700;letter-spacing:.02em}
+.t-up{color:var(--up)} .t-down{color:var(--down)}
+.tape .t-up{color:#4fd18e} .tape .t-down{color:#ff7b80}
+@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion: reduce){.tape-track{animation:none}.tape{overflow-x:auto}}
+
+/* Cabeçalho */
+header.top{padding-block:28px 8px}
+.brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pulse{width:44px;height:28px;flex:none}
+.pulse path{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+h1{font-size:clamp(30px,6vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1}
+.tagline{color:var(--muted);margin:10px 0 0;max-width:58ch}
+.days{display:flex;gap:8px;overflow-x:auto;padding-block:18px 6px;scrollbar-width:thin}
+.day{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:14px;color:var(--muted)}
+.day[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600}
+
+.lead{background:var(--accent-soft);border-radius:14px;padding:18px 20px;margin-block:14px 6px;display:grid;gap:6px}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.lead p{margin:0;font-family:var(--f-display);font-weight:500;font-size:clamp(19px,2.6vw,23px);line-height:1.3;text-wrap:balance}
+.lead small{color:var(--muted);font-size:13px}
+
+/* Grelha */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;padding-block:18px 48px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:8px;padding:5px 11px;font-size:13.5px;cursor:pointer;color:var(--muted)}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+.progress{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{width:90px;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--up);width:0;transition:width .4s ease}
+
+.feed{display:grid;gap:12px}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px 14px;display:grid;gap:10px;transition:border-color .2s, transform .2s}
+.post:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.post.read{opacity:.72}
+.post-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cat{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.mood{margin-left:auto;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:99px;display:inline-flex;gap:5px;align-items:center}
+.mood.sobe{background:var(--up-soft);color:var(--up)}
+.mood.desce{background:var(--down-soft);color:var(--down)}
+.mood.neutro{background:var(--flat-soft);color:var(--flat)}
+.post h2{font-size:21px;font-weight:700;line-height:1.2;letter-spacing:-.01em}
+.post p.txt{margin:0;max-width:65ch}
+.tickers{display:flex;flex-wrap:wrap;gap:6px}
+.tk{font-family:var(--f-mono);font-size:12.5px;border-radius:6px;padding:2px 8px;background:var(--bg);font-variant-numeric:tabular-nums}
+.tk b{font-weight:700;margin-right:6px;color:var(--ink)}
+.explain{border-top:1px dashed var(--line);padding-top:10px}
+.explain summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:14.5px;list-style:none;display:flex;align-items:center;gap:6px}
+.explain summary::-webkit-details-marker{display:none}
+.explain summary::before{content:"+";font-family:var(--f-mono);display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;background:var(--accent-soft);font-size:14px}
+.explain[open] summary::before{content:"−"}
+.explain p{margin:8px 0 0;max-width:65ch;color:var(--ink)}
+.post-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.post-foot a{color:var(--muted)}
+.readbtn{border:1px solid var(--line);background:transparent;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px}
+.post.read .readbtn{background:var(--up-soft);color:var(--up);border-color:transparent;font-weight:600}
+
+/* Lateral */
+aside{display:grid;gap:14px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+@media (max-width:860px){aside{position:static}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.panel h3{font-size:15px;font-weight:700;margin-bottom:10px}
+.nums{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.nums li{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding-block:7px;border-bottom:1px solid var(--line);font-size:14px;align-items:baseline}
+.nums li:last-child{border-bottom:0}
+.nums .v{font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.nums .c{font-family:var(--f-mono);font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;min-width:62px;text-align:right}
+.term{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.term .eyebrow{color:var(--bg);opacity:.7}
+.term h3{font-size:22px;margin:6px 0 6px}
+.term p{margin:0;font-size:14.5px}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding-block:20px 32px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="tape" aria-label="Cotações do dia"><div class="tape-track" id="tape"></div></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="pulse" viewBox="0 0 44 28" aria-hidden="true"><path d="M2 18h9l4-10 6 16 5-12 4 6h12"/></svg>
+      <h1>Daily Alpha</h1>
+    </div>
+    <p class="tagline">As notícias que mexeram com os mercados hoje, em posts curtos. Cada uma traz uma explicação simples para quem está a começar.</p>
+    <nav class="days" id="days" aria-label="Escolher dia"></nav>
+    <div class="lead" id="lead"></div>
+  </header>
+
+  <div class="grid">
+    <main>
+      <div class="toolbar">
+        <div class="filters" id="filters" role="group" aria-label="Filtrar por tema"></div>
+        <div class="progress" aria-live="polite"><span id="progtxt"></span><span class="bar"><i id="progbar"></i></span></div>
+      </div>
+      <div class="feed" id="feed"></div>
+    </main>
+    <aside>
+      <section class="panel term" id="term"></section>
+      <section class="panel">
+        <h3>Números do dia</h3>
+        <ul class="nums" id="nums"></ul>
+        <p class="note" id="numsnote" style="margin-top:8px"></p>
+      </section>
+      <section class="panel">
+        <h3>Como ler isto</h3>
+        <p class="note"><b style="color:var(--up)">▲ Sobe</b> boa notícia para as ações envolvidas. <b style="color:var(--down)">▼ Desce</b> pressão de venda. <b style="color:var(--flat)">● Atenção</b> tema a acompanhar. As percentagens comparam com o fecho do dia anterior.</p>
+      </section>
+    </aside>
+  </div>
+
+  <footer>
+    O Daily Alpha resume notícias públicas para fins educativos e não é aconselhamento financeiro. Os valores podem mudar ao longo do dia; confirma sempre na fonte antes de decidir.
+  </footer>
+</div>
+
+<script type="application/json" id="dados">
+{"dias":[
+{
+"data":"2026-10-14",
+"atualizado":"14 out, 15:30 (Lisboa)",
+"resumo":"Inflação acima do esperado nos EUA pesa em Wall Street, enquanto a Europa sobe à boleia da ASML.",
+"termo":{"palavra":"Inflação core","definicao":"É a inflação sem energia e alimentação, os preços que mais oscilam. Os bancos centrais olham muito para ela porque mostra a tendência de fundo dos preços."},
+"mercados":[
+{"nome":"S&P 500","valor":"EUA","var":-0.45},
+{"nome":"Nasdaq","valor":"EUA","var":-0.63},
+{"nome":"Dow Jones","valor":"EUA","var":-0.04},
+{"nome":"Stoxx 600","valor":"638,60","var":0.57},
+{"nome":"PSI (Lisboa)","valor":"9.407,90","var":0.30},
+{"nome":"Petróleo Brent","valor":"$106,50","var":0.79},
+{"nome":"Ouro","valor":"$4.164","var":-0.31},
+{"nome":"Bitcoin","valor":"$83.376","var":0.04},
+{"nome":"EUR/USD","valor":"1,1205","var":0.05}
+],
+"posts":[
+{"cat":"Economia","humor":"desce","titulo":"Inflação nos EUA volta a aquecer e Wall Street recua","texto":"Os preços nos EUA subiram 3,7% num ano em setembro, acima dos 3,6% esperados e dos 3,4% de agosto. A inflação core também ficou acima das previsões. O S&P 500 e o Nasdaq abriram em queda.","tickers":[{"s":"S&P 500","v":-0.45},{"s":"Nasdaq","v":-0.63}],"explica":"Inflação é a subida geral dos preços. Quando fica acima do esperado, os investidores temem que a Reserva Federal (o banco central dos EUA) suba os juros, o que costuma pesar nas ações.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
+{"cat":"Juros","humor":"neutro","titulo":"A Fed pode voltar a subir os juros já este mês","texto":"Depois dos dados da inflação, os investidores passaram a dar mais probabilidade a uma subida de juros na reunião de 27 e 28 de outubro. A Fed já subiu a taxa para 4% em setembro. O juro da dívida americana a 10 anos passou os 5,2%.","tickers":[{"s":"Yield 10A","v":0.06}],"explica":"Juros mais altos tornam o crédito mais caro para empresas e famílias, e fazem com que as obrigações (dívida) rendam mais. Assim, algum dinheiro sai das ações para as obrigações.","fonte":{"nome":"24/7 Wall St.","url":"https://247wallst.com/investing/2026/10/14/stock-market-today-stocks-head-lower-as-hot-inflation-puts-another-fed-rate-hike-back-in-play/"}},
+{"cat":"Empresas","humor":"desce","titulo":"Bank of America afunda após lucros fracos e multa milionária","texto":"O banco apresentou uma queda nos lucros, abaixo do esperado, e ainda uma penalização de mais de 1,2 mil milhões de dólares. As ações caíram cerca de 5,5% nas primeiras horas.","tickers":[{"s":"BAC","v":-5.53},{"s":"STT","v":-7.62}],"explica":"Estamos na época de resultados: as empresas cotadas mostram as contas do trimestre. O que move a ação não é só o lucro, mas a comparação com o que os analistas esperavam.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
+{"cat":"Empresas","humor":"sobe","titulo":"BlackRock sobe com resultados acima do esperado","texto":"A maior gestora de fundos do mundo bateu as estimativas do terceiro trimestre, com ativos sob gestão em máximos. A ação ganhava perto de 4%.","tickers":[{"s":"BLK","v":3.87}],"explica":"A BlackRock gere o dinheiro de milhões de pessoas, incluindo os ETF iShares. Um ETF é um fundo que compras como uma ação e que replica um índice inteiro, uma forma simples de começar a investir.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
+{"cat":"Europa","humor":"sobe","titulo":"ASML puxa as bolsas europeias graças à inteligência artificial","texto":"A fabricante holandesa de máquinas para chips subiu as previsões pela terceira vez este ano, com a procura ligada à IA a crescer. O Stoxx 600 subia 0,57% e o setor tecnológico europeu 0,7%.","tickers":[{"s":"ASML","v":1.0},{"s":"Stoxx 600","v":0.57}],"explica":"Quando uma empresa melhora o guidance (as suas previsões para o futuro), dá sinal de confiança. A ASML é a única que faz as máquinas mais avançadas para fabricar chips, por isso é um termómetro do setor.","fonte":{"nome":"DGABC / Estadão","url":"https://www.dgabc.com.br/Noticia/4352583/bolsas-da-europa-avancam-com-tecnologia-apoiada-por-balanco-da-asml"}},
+{"cat":"Portugal","humor":"sobe","titulo":"Bolsa de Lisboa acompanha a subida europeia","texto":"O PSI chegou a subir 0,83% de manhã e seguia depois com ganhos de 0,3%, nos 9.407,90 pontos. Em Espanha, a inflação de setembro foi de 4,9%, a mais alta desde 2023.","tickers":[{"s":"PSI","v":0.30}],"explica":"O PSI é o índice que junta as maiores empresas cotadas em Portugal, como EDP, Galp, Jerónimo Martins ou BCP. Se o PSI sobe, em média estas ações valorizaram.","fonte":{"nome":"Jornal Económico","url":"https://jornaleconomico.sapo.pt/noticias/bolsas-europeias-em-alta-com-petroleo-a-subir-e-a-espera-da-inflacao-dos-eua/"}},
+{"cat":"Energia","humor":"neutro","titulo":"Petróleo acima dos 100 dólares após ataque à Aramco","texto":"O Brent subia para cerca de 106,50 dólares e o WTI para 95,47, depois de um ataque a um edifício da petrolífera saudita Aramco e de relatos de ataques a navios.","tickers":[{"s":"Brent","v":0.79},{"s":"WTI","v":1.41}],"explica":"O petróleo mais caro encarece combustíveis e transportes, alimentando a inflação. É bom para petrolíferas como a Galp, mas mau para companhias aéreas e para quem consome muita energia.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
+{"cat":"Tecnologia","humor":"desce","titulo":"Chips sob pressão: Micron cai com concorrência chinesa","texto":"A Micron recuava perto de 4% depois de notícias sobre avanços tecnológicos da chinesa CXMT, também fabricante de memórias. O índice de semicondutores já perdeu mais de 8% em cinco sessões.","tickers":[{"s":"MU","v":-3.62},{"s":"AMAT","v":-6.69}],"explica":"Semicondutores são os chips dentro de telemóveis, carros e centros de dados. Subiram muito com a IA, por isso qualquer ameaça de concorrência ou de preços mais baixos provoca quedas rápidas.","fonte":{"nome":"24/7 Wall St.","url":"https://247wallst.com/investing/2026/10/14/stock-market-today-stocks-head-lower-as-hot-inflation-puts-another-fed-rate-hike-back-in-play/"}},
+{"cat":"Empresas","humor":"neutro","titulo":"Netflix vai cortar cerca de mil postos de trabalho","texto":"A plataforma de streaming vai reduzir cerca de 6% da equipa. A ação mexeu pouco, e o mercado está à espera dos resultados, que saem a 20 de outubro.","tickers":[{"s":"NFLX","v":0.37}],"explica":"Cortes de pessoal reduzem custos e podem aumentar o lucro, por isso nem sempre fazem a ação cair. O mercado tenta adivinhar se é sinal de eficiência ou de problemas.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
+{"cat":"Ouro e cripto","humor":"neutro","titulo":"Ouro recua ligeiramente, Bitcoin parado nos 83 mil","texto":"O ouro descia 0,3% para perto de 4.164 dólares por onça. A bitcoin praticamente não mexia, perto dos 83.400 dólares.","tickers":[{"s":"Ouro","v":-0.31},{"s":"BTC","v":0.04}],"explica":"O ouro é visto como um refúgio em tempos de incerteza, mas não paga juros; quando os juros sobem, perde algum brilho. A bitcoin é muito mais volátil e reage sobretudo ao apetite pelo risco.","fonte":{"nome":"Jornal Económico","url":"https://jornaleconomico.sapo.pt/noticias/bolsas-europeias-em-alta-com-petroleo-a-subir-e-a-espera-da-inflacao-dos-eua/"}}
+]
+}
+]}
+</script>
+
+<script>
+(function(){
+  var DATA = {dias:[]};
+  try { DATA = JSON.parse(document.getElementById('dados').textContent); } catch(e) {}
+  var dias = (DATA.dias||[]).slice().sort(function(a,b){return a.data<b.data?1:-1});
+  var state = { dia: dias[0] ? dias[0].data : null, cat: 'Tudo' };
+  try { var h = location.hash.replace('#',''); if (dias.some(function(d){return d.data===h})) state.dia = h; } catch(e){}
+
+  var $ = function(id){return document.getElementById(id)};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function pct(v){var s=(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2).replace('.',',')+'%';return s}
+  function cls(v){return v>0?'t-up':v<0?'t-down':''}
+  function fmtDia(iso, curto){
+    var d = new Date(iso+'T12:00:00');
+    try { return d.toLocaleDateString('pt-PT', curto?{weekday:'short',day:'numeric',month:'short'}:{weekday:'long',day:'numeric',month:'long'}); } catch(e){ return iso; }
+  }
+  function lidosKey(){return 'pulso-lidos-'+state.dia}
+  function getLidos(){try{return JSON.parse(localStorage.getItem(lidosKey())||'[]')}catch(e){return []}}
+  function setLidos(a){try{localStorage.setItem(lidosKey(),JSON.stringify(a))}catch(e){}}
+  var MOOD = {sobe:'▲ Sobe', desce:'▼ Desce', neutro:'● Atenção'};
+
+  function renderDays(){
+    $('days').innerHTML = dias.map(function(d,i){
+      var label = i===0 ? 'Hoje · '+fmtDia(d.data,true) : fmtDia(d.data,true);
+      return '<button class="day" data-d="'+esc(d.data)+'" aria-pressed="'+(d.data===state.dia)+'">'+esc(label)+'</button>';
+    }).join('');
+  }
+
+  function render(){
+    var dia = dias.filter(function(d){return d.data===state.dia})[0];
+    renderDays();
+    if(!dia){
+      $('feed').innerHTML='<div class="empty">Ainda não há notícias publicadas. As primeiras aparecem aqui assim que o dia de mercado arrancar.</div>';
+      return;
+    }
+    // fita
+    var items = (dia.mercados||[]).map(function(m){
+      return '<span class="tape-item"><b>'+esc(m.nome)+'</b><span class="'+cls(m.var)+'">'+(m.var>0?'▲':m.var<0?'▼':'•')+' '+pct(m.var)+'</span></span>';
+    }).join('');
+    $('tape').innerHTML = items + items;
+
+    $('lead').innerHTML = '<span class="eyebrow">O dia em 10 segundos · '+esc(fmtDia(dia.data))+'</span><p>'+esc(dia.resumo)+'</p><small>Atualizado: '+esc(dia.atualizado||'')+'</small>';
+
+    var t = dia.termo||{};
+    $('term').innerHTML = '<span class="eyebrow">Termo do dia</span><h3>'+esc(t.palavra)+'</h3><p>'+esc(t.definicao)+'</p>';
+
+    $('nums').innerHTML = (dia.mercados||[]).map(function(m){
+      var v = /^[A-Z]{2,4}$/.test(m.valor) ? '' : m.valor;
+      return '<li><span>'+esc(m.nome)+'</span><span class="v">'+esc(v)+'</span><span class="c '+cls(m.var)+'">'+pct(m.var)+'</span></li>';
+    }).join('');
+    $('numsnote').textContent = 'Valores intradiários, '+(dia.atualizado||'');
+
+    var cats = ['Tudo'].concat((dia.posts||[]).map(function(p){return p.cat}).filter(function(c,i,a){return a.indexOf(c)===i}));
+    if(cats.indexOf(state.cat)<0) state.cat='Tudo';
+    $('filters').innerHTML = cats.map(function(c){return '<button class="chip" data-c="'+esc(c)+'" aria-pressed="'+(c===state.cat)+'">'+esc(c)+'</button>'}).join('');
+
+    var lidos = getLidos();
+    var posts = (dia.posts||[]).map(function(p,i){p._i=i;return p}).filter(function(p){return state.cat==='Tudo'||p.cat===state.cat});
+    $('feed').innerHTML = posts.map(function(p){
+      var lido = lidos.indexOf(p._i)>=0;
+      return '<article class="post'+(lido?' read':'')+'" data-i="'+p._i+'">'+
+        '<div class="post-head"><span class="cat">'+esc(p.cat)+'</span><span class="mood '+esc(p.humor)+'">'+(MOOD[p.humor]||'')+'</span></div>'+
+        '<h2>'+esc(p.titulo)+'</h2>'+
+        '<p class="txt">'+esc(p.texto)+'</p>'+
+        ((p.tickers&&p.tickers.length)?'<div class="tickers">'+p.tickers.map(function(k){return '<span class="tk"><b>'+esc(k.s)+'</b><span class="'+cls(k.v)+'">'+pct(k.v)+'</span></span>'}).join('')+'</div>':'')+
+        '<details class="explain"><summary>O que é que isto significa?</summary><p>'+esc(p.explica)+'</p></details>'+
+        '<div class="post-foot"><span>Fonte: '+(p.fonte&&p.fonte.url?'<a href="'+esc(p.fonte.url)+'" target="_blank" rel="noopener">'+esc(p.fonte.nome)+'</a>':esc(p.fonte&&p.fonte.nome))+'</span>'+
+        '<button class="readbtn" data-read="'+p._i+'">'+(lido?'✓ Lido':'Marcar como lido')+'</button></div>'+
+      '</article>';
+    }).join('') || '<div class="empty">Sem notícias neste tema hoje.</div>';
+    progress(dia);
+  }
+
+  function progress(dia){
+    var n=(dia.posts||[]).length, l=getLidos().length;
+    $('progtxt').textContent = l+' de '+n+' lidas';
+    $('progbar').style.width = (n?Math.round(l/n*100):0)+'%';
+  }
+
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-d]');
+    if(b){ state.dia=b.getAttribute('data-d'); state.cat='Tudo'; render(); return; }
+    var c = e.target.closest('[data-c]');
+    if(c){ state.cat=c.getAttribute('data-c'); render(); return; }
+    var r = e.target.closest('[data-read]');
+    if(r){
+      var i=+r.getAttribute('data-read'), l=getLidos(), k=l.indexOf(i);
+      if(k>=0) l.splice(k,1); else l.push(i);
+      setLidos(l); render();
+    }
+  });
+  document.addEventListener('toggle', function(e){
+    if(e.target.classList && e.target.classList.contains('explain') && e.target.open){
+      var art=e.target.closest('.post'); var i=+art.getAttribute('data-i'); var l=getLidos();
+      if(l.indexOf(i)<0){ l.push(i); setLidos(l); art.classList.add('read'); var btn=art.querySelector('.readbtn'); if(btn) btn.textContent='✓ Lido'; var dia=dias.filter(function(d){return d.data===state.dia})[0]; if(dia) progress(dia); }
+    }
+  }, true);
+
+  render();
+})();
+</script>
+
+</body>
+</html>
