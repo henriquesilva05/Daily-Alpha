@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: revista de mercado. Barra + fita de cotações; manchete ilustrada ao lado do humor do mercado e do termo do dia; bolhas de stories por tema; grelha de cartões com capas ilustradas; números do dia em tiles */
+/* Layout: revista de mercado. Barra + fita de cotações; manchete ilustrada ao lado do humor do mercado e do termo do dia; bolhas de histórias por tema; grelha de cartões com capas ilustradas; números do dia em tiles */
 :root{
   --bg:#f1f4f8; --surface:#ffffff; --ink:#0c1524; --muted:#5a6679; --line:#dce3ec;
   --accent:#1d4ed8; --accent-soft:#e2e9ff;
@@ -106,7 +106,7 @@ button{font:inherit;color:inherit}
 .term-back p{margin:0;font-size:15px}
 @media (prefers-reduced-motion: reduce){.term-inner{transition:none}}
 
-/* Stories */
+/* Histórias */
 .stories{display:flex;gap:14px;overflow-x:auto;padding-block:18px 10px;scrollbar-width:none}
 .stories::-webkit-scrollbar{display:none}
 .bubble{flex:none;display:grid;justify-items:center;gap:6px;background:none;border:0;cursor:pointer;width:76px;padding:0}
@@ -172,7 +172,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-block:20px 36px;
 .day{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13px;color:var(--muted)}
 .day[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent);font-weight:700}
 
-/* Visor de stories */
+/* Visor de histórias */
 .viewer{position:fixed;inset:0;z-index:50;background:var(--scrim);display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 12px) max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(12px,env(safe-area-inset-left,0px))}
 .sheet{position:relative;width:min(440px,100%);height:min(820px,100%);border-radius:22px;overflow:hidden;background:#0c1524;color:#fff;display:grid;grid-template-rows:auto 1fr;box-shadow:0 30px 80px rgba(0,0,0,.5)}
 .sheet .cover{position:absolute;inset:0 0 auto 0;height:52%}
@@ -208,7 +208,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-block:20px 36px;
     <a class="logo" href="#" aria-label="Daily Alpha, início"><span class="logo-mark">α</span><span class="logo-name">Daily Alpha</span></a>
     <span class="today" id="today"></span>
     <span class="spacer"></span>
-    <button class="btn-story" id="openStories" type="button"><span aria-hidden="true">▶</span><span><span class="lbl-long">Ver em </span>stories</span></button>
+    <button class="btn-story" id="openStories" type="button"><span aria-hidden="true">▶</span><span><span class="lbl-long">Modo </span>histórias</span></button>
   </div>
 </header>
 <div class="tape" aria-label="Cotações do dia"><div class="tape-track" id="tape"></div></div>
@@ -223,7 +223,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-block:20px 36px;
     </div>
   </section>
 
-  <nav class="stories" id="stories" aria-label="Stories por tema"></nav>
+  <nav class="stories" id="stories" aria-label="Histórias por tema"></nav>
 
   <section aria-label="Notícias">
     <div class="section-head">
@@ -257,42 +257,266 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-block:20px 36px;
   </footer>
 </div>
 
-<div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Stories do Daily Alpha">
+<div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Histórias do Daily Alpha">
   <div class="sheet" id="sheet"></div>
 </div>
 
 <script type="application/json" id="dados">
-{"dias":[
 {
-"data":"2026-10-14",
-"atualizado":"14 out, 15:30 (Lisboa)",
-"resumo":"Inflação acima do esperado nos EUA pesa em Wall Street, enquanto a Europa sobe à boleia da ASML.",
-"termo":{"palavra":"Inflação core","definicao":"É a inflação sem energia e alimentação, os preços que mais oscilam. Os bancos centrais olham muito para ela porque mostra a tendência de fundo dos preços."},
-"mercados":[
-{"nome":"S&P 500","valor":"EUA","var":-0.45},
-{"nome":"Nasdaq","valor":"EUA","var":-0.63},
-{"nome":"Dow Jones","valor":"EUA","var":-0.04},
-{"nome":"Stoxx 600","valor":"638,60","var":0.57},
-{"nome":"PSI (Lisboa)","valor":"9.407,90","var":0.30},
-{"nome":"Petróleo Brent","valor":"$106,50","var":0.79},
-{"nome":"Ouro","valor":"$4.164","var":-0.31},
-{"nome":"Bitcoin","valor":"$83.376","var":0.04},
-{"nome":"EUR/USD","valor":"1,1205","var":0.05}
+"dias": [
+{
+"data": "2026-10-14",
+"atualizado": "14 out, 17:40 (Lisboa)",
+"resumo": "A inflação mais alta nos EUA reacende o medo de uma nova subida de juros e afunda Wall Street, mas a Europa e Lisboa fecham no verde à boleia da ASML.",
+"termo": {
+"palavra": "Rendibilidade das obrigações",
+"definicao": "É o juro anual que recebes por emprestar dinheiro a um Estado ou a uma empresa quando compras uma obrigação. Quando esta rendibilidade sobe, as obrigações ficam mais atrativas e as ações costumam perder brilho."
+},
+"mercados": [
+{
+"nome": "S&P 500",
+"valor": "7.733,82",
+"var": -0.92
+},
+{
+"nome": "Nasdaq",
+"valor": "26.832,95",
+"var": -1.37
+},
+{
+"nome": "Dow Jones",
+"valor": "51.622,24",
+"var": -0.09
+},
+{
+"nome": "Stoxx 600",
+"valor": "UE",
+"var": 0.62
+},
+{
+"nome": "PSI (Lisboa)",
+"valor": "9.415,66",
+"var": 0.38
+},
+{
+"nome": "Petróleo Brent",
+"valor": "$106,50",
+"var": 0.79
+},
+{
+"nome": "Ouro",
+"valor": "$4.106,80",
+"var": -1.69
+},
+{
+"nome": "Bitcoin",
+"valor": "$81.789",
+"var": -1.86
+},
+{
+"nome": "EUR/USD",
+"valor": "1,1135",
+"var": -0.55
+}
 ],
-"posts":[
-{"cat":"Economia","humor":"desce","titulo":"Inflação nos EUA volta a aquecer e Wall Street recua","texto":"Os preços nos EUA subiram 3,7% num ano em setembro, acima dos 3,6% esperados e dos 3,4% de agosto. A inflação core também ficou acima das previsões. O S&P 500 e o Nasdaq abriram em queda.","tickers":[{"s":"S&P 500","v":-0.45},{"s":"Nasdaq","v":-0.63}],"explica":"Inflação é a subida geral dos preços. Quando fica acima do esperado, os investidores temem que a Reserva Federal (o banco central dos EUA) suba os juros, o que costuma pesar nas ações.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
-{"cat":"Juros","humor":"neutro","titulo":"A Fed pode voltar a subir os juros já este mês","texto":"Depois dos dados da inflação, os investidores passaram a dar mais probabilidade a uma subida de juros na reunião de 27 e 28 de outubro. A Fed já subiu a taxa para 4% em setembro. O juro da dívida americana a 10 anos passou os 5,2%.","tickers":[{"s":"Yield 10A","v":0.06}],"explica":"Juros mais altos tornam o crédito mais caro para empresas e famílias, e fazem com que as obrigações (dívida) rendam mais. Assim, algum dinheiro sai das ações para as obrigações.","fonte":{"nome":"24/7 Wall St.","url":"https://247wallst.com/investing/2026/10/14/stock-market-today-stocks-head-lower-as-hot-inflation-puts-another-fed-rate-hike-back-in-play/"}},
-{"cat":"Empresas","humor":"desce","titulo":"Bank of America afunda após lucros fracos e multa milionária","texto":"O banco apresentou uma queda nos lucros, abaixo do esperado, e ainda uma penalização de mais de 1,2 mil milhões de dólares. As ações caíram cerca de 5,5% nas primeiras horas.","tickers":[{"s":"BAC","v":-5.53},{"s":"STT","v":-7.62}],"explica":"Estamos na época de resultados: as empresas cotadas mostram as contas do trimestre. O que move a ação não é só o lucro, mas a comparação com o que os analistas esperavam.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
-{"cat":"Empresas","humor":"sobe","titulo":"BlackRock sobe com resultados acima do esperado","texto":"A maior gestora de fundos do mundo bateu as estimativas do terceiro trimestre, com ativos sob gestão em máximos. A ação ganhava perto de 4%.","tickers":[{"s":"BLK","v":3.87}],"explica":"A BlackRock gere o dinheiro de milhões de pessoas, incluindo os ETF iShares. Um ETF é um fundo que compras como uma ação e que replica um índice inteiro, uma forma simples de começar a investir.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
-{"cat":"Europa","humor":"sobe","titulo":"ASML puxa as bolsas europeias graças à inteligência artificial","texto":"A fabricante holandesa de máquinas para chips subiu as previsões pela terceira vez este ano, com a procura ligada à IA a crescer. O Stoxx 600 subia 0,57% e o setor tecnológico europeu 0,7%.","tickers":[{"s":"ASML","v":1.0},{"s":"Stoxx 600","v":0.57}],"explica":"Quando uma empresa melhora o guidance (as suas previsões para o futuro), dá sinal de confiança. A ASML é a única que faz as máquinas mais avançadas para fabricar chips, por isso é um termómetro do setor.","fonte":{"nome":"DGABC / Estadão","url":"https://www.dgabc.com.br/Noticia/4352583/bolsas-da-europa-avancam-com-tecnologia-apoiada-por-balanco-da-asml"}},
-{"cat":"Portugal","humor":"sobe","titulo":"Bolsa de Lisboa acompanha a subida europeia","texto":"O PSI chegou a subir 0,83% de manhã e seguia depois com ganhos de 0,3%, nos 9.407,90 pontos. Em Espanha, a inflação de setembro foi de 4,9%, a mais alta desde 2023.","tickers":[{"s":"PSI","v":0.30}],"explica":"O PSI é o índice que junta as maiores empresas cotadas em Portugal, como EDP, Galp, Jerónimo Martins ou BCP. Se o PSI sobe, em média estas ações valorizaram.","fonte":{"nome":"Jornal Económico","url":"https://jornaleconomico.sapo.pt/noticias/bolsas-europeias-em-alta-com-petroleo-a-subir-e-a-espera-da-inflacao-dos-eua/"}},
-{"cat":"Energia","humor":"neutro","titulo":"Petróleo acima dos 100 dólares após ataque à Aramco","texto":"O Brent subia para cerca de 106,50 dólares e o WTI para 95,47, depois de um ataque a um edifício da petrolífera saudita Aramco e de relatos de ataques a navios.","tickers":[{"s":"Brent","v":0.79},{"s":"WTI","v":1.41}],"explica":"O petróleo mais caro encarece combustíveis e transportes, alimentando a inflação. É bom para petrolíferas como a Galp, mas mau para companhias aéreas e para quem consome muita energia.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
-{"cat":"Tecnologia","humor":"desce","titulo":"Chips sob pressão: Micron cai com concorrência chinesa","texto":"A Micron recuava perto de 4% depois de notícias sobre avanços tecnológicos da chinesa CXMT, também fabricante de memórias. O índice de semicondutores já perdeu mais de 8% em cinco sessões.","tickers":[{"s":"MU","v":-3.62},{"s":"AMAT","v":-6.69}],"explica":"Semicondutores são os chips dentro de telemóveis, carros e centros de dados. Subiram muito com a IA, por isso qualquer ameaça de concorrência ou de preços mais baixos provoca quedas rápidas.","fonte":{"nome":"24/7 Wall St.","url":"https://247wallst.com/investing/2026/10/14/stock-market-today-stocks-head-lower-as-hot-inflation-puts-another-fed-rate-hike-back-in-play/"}},
-{"cat":"Empresas","humor":"neutro","titulo":"Netflix vai cortar cerca de mil postos de trabalho","texto":"A plataforma de streaming vai reduzir cerca de 6% da equipa. A ação mexeu pouco, e o mercado está à espera dos resultados, que saem a 20 de outubro.","tickers":[{"s":"NFLX","v":0.37}],"explica":"Cortes de pessoal reduzem custos e podem aumentar o lucro, por isso nem sempre fazem a ação cair. O mercado tenta adivinhar se é sinal de eficiência ou de problemas.","fonte":{"nome":"TheStreet","url":"https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"}},
-{"cat":"Ouro e cripto","humor":"neutro","titulo":"Ouro recua ligeiramente, Bitcoin parado nos 83 mil","texto":"O ouro descia 0,3% para perto de 4.164 dólares por onça. A bitcoin praticamente não mexia, perto dos 83.400 dólares.","tickers":[{"s":"Ouro","v":-0.31},{"s":"BTC","v":0.04}],"explica":"O ouro é visto como um refúgio em tempos de incerteza, mas não paga juros; quando os juros sobem, perde algum brilho. A bitcoin é muito mais volátil e reage sobretudo ao apetite pelo risco.","fonte":{"nome":"Jornal Económico","url":"https://jornaleconomico.sapo.pt/noticias/bolsas-europeias-em-alta-com-petroleo-a-subir-e-a-espera-da-inflacao-dos-eua/"}}
+"posts": [
+{
+"cat": "Economia",
+"humor": "desce",
+"titulo": "Inflação mais quente nos EUA deixa Wall Street no vermelho",
+"texto": "Os preços nos EUA subiram 3,7% num ano em setembro, acima dos 3,6% previstos, e a inflação subjacente passou para 2,6%. A meio da sessão, o S&P 500 perdia 0,92% e o Nasdaq 1,37%, com mais de 70% das ações em queda.",
+"tickers": [
+{
+"s": "S&P 500",
+"v": -0.92
+},
+{
+"s": "Nasdaq",
+"v": -1.37
+},
+{
+"s": "Dow",
+"v": -0.09
+}
+],
+"explica": "A inflação mede quanto sobem os preços. Se sobe mais do que o esperado, o banco central pode ter de travar a economia com juros mais altos, e isso costuma fazer cair as ações, sobretudo as de tecnologia.",
+"fonte": {
+"nome": "TheStreet",
+"url": "https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"
+}
+},
+{
+"cat": "Juros",
+"humor": "desce",
+"titulo": "Mercado já aposta meio-a-meio numa subida de juros da Fed",
+"texto": "Depois dos dados da inflação, os investidores passaram a ver uma probabilidade de cerca de 50% de a Fed subir os juros ainda este mês. O juro da dívida americana a 10 anos saltou de 5,18% para 5,31% e o dólar ganhou 0,5% face às principais moedas.",
+"tickers": [
+{
+"s": "Juro 10 anos",
+"v": 0.13
+}
+],
+"explica": "Os investidores usam os preços dos contratos de futuros para estimar o que o banco central vai fazer. Quando a probabilidade de uma subida aumenta, os juros da dívida sobem logo, antes mesmo de a decisão ser tomada.",
+"fonte": {
+"nome": "BullionVault",
+"url": "https://www.bullionvault.com/gold-news/gold-price-news/gold-inflation-bond-yields-101420261"
+}
+},
+{
+"cat": "Empresas",
+"humor": "desce",
+"titulo": "Bank of America tropeça numa multa de 1,2 mil milhões",
+"texto": "O lucro do banco caiu 17% para 6,93 mil milhões de dólares, penalizado por uma multa ligada a falhas no controlo de branqueamento de capitais. Sem esse efeito, o lucro por ação foi de 1,08 dólares, abaixo dos 1,10 esperados, e a ação chegou a cair 9%.",
+"tickers": [
+{
+"s": "BAC",
+"v": -5.53
+}
+],
+"explica": "O lucro por ação (LPA) divide o lucro da empresa pelo número de ações. Os analistas fazem previsões para este número, e falhar a previsão, mesmo por pouco, costuma castigar a ação.",
+"fonte": {
+"nome": "Yahoo Finance",
+"url": "https://finance.yahoo.com/markets/live/stock-market-today-wednesday-october-14-dow-sp-500-nasdaq-081136597.html"
+}
+},
+{
+"cat": "Europa",
+"humor": "sobe",
+"titulo": "Europa ignora Wall Street e fecha em alta com a ASML",
+"texto": "O Stoxx 600 terminou o dia a ganhar 0,62%, com os chips a liderar. A ASML subiu 1,9% depois de prever vendas acima do esperado no último trimestre, e a Infineon ganhou 1,6%. Em sentido contrário, o banco sueco SEB caiu 5% após o regulador lhe exigir mais capital.",
+"tickers": [
+{
+"s": "Stoxx 600",
+"v": 0.62
+},
+{
+"s": "ASML",
+"v": 1.9
+},
+{
+"s": "SEB",
+"v": -5.0
+}
+],
+"explica": "O Stoxx 600 junta 600 grandes empresas de 17 países europeus. É uma boa forma de ver, num só número, se a bolsa europeia teve um dia bom ou mau.",
+"fonte": {
+"nome": "IndexBox",
+"url": "https://www.indexbox.io/blog/european-stocks-close-higher-as-asml-forecast-boosts-semiconductors/"
+}
+},
+{
+"cat": "Portugal",
+"humor": "sobe",
+"titulo": "Lisboa soma segundo dia de ganhos",
+"texto": "O PSI fechou a subir 0,38%, nos 9.415,66 pontos, depois de já ter ganho 0,73% na terça-feira. Londres (+0,70%), Paris (+0,58%) e Frankfurt (+0,25%) também subiram, enquanto Milão recuou 0,61%.",
+"tickers": [
+{
+"s": "PSI",
+"v": 0.38
+},
+{
+"s": "CAC 40",
+"v": 0.58
+},
+{
+"s": "FTSE MIB",
+"v": -0.61
+}
+],
+"explica": "Cada país tem o seu índice de referência: o PSI em Portugal, o CAC 40 em França, o DAX na Alemanha. Comparar os índices ajuda a perceber se um movimento é local ou de toda a Europa.",
+"fonte": {
+"nome": "O Povo / Estadão",
+"url": "https://www.opovo.com.br/noticias/economia/2026/10/14/bolsas-da-europa-fecham-majoritariamente-em-alta-com-apetite-por-acoes-ligadas-a-chips.html"
+}
+},
+{
+"cat": "Empresas",
+"humor": "neutro",
+"titulo": "Morgan Stanley fatura mais à boleia das ações",
+"texto": "O banco de investimento teve receitas de 20,34 mil milhões de dólares no trimestre, mais 12% do que há um ano, e um lucro de 4,91 mil milhões. A negociação de ações rendeu 5,8 mil milhões, mais 41%, mas a área de obrigações recuou 7%.",
+"tickers": [],
+"explica": "Um banco de investimento ganha dinheiro a comprar e vender ações e obrigações para clientes. Quando os mercados mexem muito, há mais negócio e mais comissões.",
+"fonte": {
+"nome": "GuruFocus",
+"url": "https://www.gurufocus.com/news/9123536/morgan-stanley-reports-strong-q3-earnings-stock-ticker-ms"
+}
+},
+{
+"cat": "Energia",
+"humor": "neutro",
+"titulo": "Gasolina 34% mais cara nos EUA com petróleo acima dos 100 dólares",
+"texto": "O Brent seguia nos 106,50 dólares por barril e o WTI nos 95,47, com os ataques no Médio Oriente a ameaçar o abastecimento. Nos EUA, a gasolina está 34,2% mais cara do que há um ano e explica mais de metade da subida mensal da inflação.",
+"tickers": [
+{
+"s": "Brent",
+"v": 0.79
+},
+{
+"s": "WTI",
+"v": 1.41
+}
+],
+"explica": "Brent e WTI são os dois preços de referência do petróleo: o primeiro vem do Mar do Norte e serve de base na Europa, o segundo é o americano. Quando sobem, o combustível encarece e a inflação acelera.",
+"fonte": {
+"nome": "TheStreet",
+"url": "https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-oct-14-2026"
+}
+},
+{
+"cat": "Moeda",
+"humor": "desce",
+"titulo": "Euro cai para mínimos desde maio de 2025",
+"texto": "O euro recuava 0,55% para perto de 1,1135 dólares, o valor mais baixo em cerca de 17 meses. A perspetiva de juros ainda mais altos nos EUA torna o dólar mais atrativo para os investidores.",
+"tickers": [
+{
+"s": "EUR/USD",
+"v": -0.55
+}
+],
+"explica": "A taxa de câmbio diz quantos dólares vale um euro. Se o euro cai, viajar para os EUA ou comprar produtos e ações americanas fica mais caro para quem vive na zona euro.",
+"fonte": {
+"nome": "FXStreet",
+"url": "https://www.fxstreet.com/news/euro-plunges-to-17-month-low-as-hot-us-inflation-fuels-fed-rate-hike-bets-202610141306"
+}
+},
+{
+"cat": "Ouro",
+"humor": "desce",
+"titulo": "Ouro afunda para mínimos de quase dez semanas",
+"texto": "O ouro chegou a perder 75 dólares por onça, para 4.079 dólares em Londres, com a subida dos juros e do dólar. A prata caiu mais de 2 dólares e tocou nos 56,58, o valor mais baixo em 12 semanas.",
+"tickers": [
+{
+"s": "Ouro",
+"v": -1.69
+}
+],
+"explica": "O ouro não paga juros. Quando as obrigações passam a render mais, alguns investidores trocam o ouro por esses ativos, e como o ouro é cotado em dólares, um dólar forte também o encarece para quem compra noutras moedas.",
+"fonte": {
+"nome": "BullionVault",
+"url": "https://www.bullionvault.com/gold-news/gold-price-news/gold-inflation-bond-yields-101420261"
+}
+},
+{
+"cat": "Cripto",
+"humor": "desce",
+"titulo": "Bitcoin escorrega abaixo dos 82 mil dólares",
+"texto": "A bitcoin caiu até perto dos 81.500 dólares depois dos dados da inflação, e o ether desceu mais de 2%. Em 24 horas, mais de 250 milhões de dólares em apostas na subida foram liquidados à força.",
+"tickers": [
+{
+"s": "BTC",
+"v": -1.86
+}
+],
+"explica": "Uma liquidação acontece quando alguém investiu com dinheiro emprestado (alavancagem) e o preço cai demasiado: a plataforma fecha a posição automaticamente, o que pode acelerar ainda mais a queda.",
+"fonte": {
+"nome": "Crypto Briefing",
+"url": "https://cryptobriefing.com/bitcoin-falls-below-82k-as-hotter-us-inflation-fuels-fed-rate-hike-bets/"
+}
+}
 ]
 }
-]}
+]
+}
 </script>
 
 <script>
@@ -313,7 +537,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-block:20px 36px;
   function getLidos(){try{return JSON.parse(localStorage.getItem(lidosKey())||'[]')}catch(e){return[]}}
   function setLidos(a){try{localStorage.setItem(lidosKey(),JSON.stringify(a))}catch(e){}}
   function markRead(i){var l=getLidos();if(l.indexOf(i)<0){l.push(i);setLidos(l)}}
-  function readTime(p){var w=((p.texto||'')+' '+(p.explica||'')).split(/\s+/).length;return Math.max(20,Math.round(w/200*60/10)*10)+' seg'}
+  function readTime(p){var w=((p.texto||'')+' '+(p.explica||'')).split(/\s+/).length;return Math.max(20,Math.round(w/200*60/10)*10)+' s de leitura'}
   var MOOD={sobe:'▲ Sobe',desce:'▼ Desce',neutro:'● Atenção'};
   function curDia(){return dias.filter(function(d){return d.data===state.dia})[0]}
 
@@ -427,7 +651,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-block:20px 36px;
 
     var f=posts[0];
     $('featured').setAttribute('data-story',f?f._i:'');
-    $('featured').innerHTML=f?'<div class="cover">'+cover(f,'feat')+'</div><div class="shade"></div><div class="body"><span class="tag"><span class="pill">Manchete</span>'+esc(f.cat)+' · '+(MOOD[f.humor]||'')+'</span><h2>'+esc(f.titulo)+'</h2><p>'+esc(f.texto)+'</p><span class="read">Ler em modo stories →</span></div>':'';
+    $('featured').innerHTML=f?'<div class="cover">'+cover(f,'feat')+'</div><div class="shade"></div><div class="body"><span class="tag"><span class="pill">Manchete</span>'+esc(f.cat)+' · '+(MOOD[f.humor]||'')+'</span><h2>'+esc(f.titulo)+'</h2><p>'+esc(f.texto)+'</p><span class="read">Ler em modo histórias →</span></div>':'';
 
     var c={sobe:0,desce:0,neutro:0};posts.forEach(function(p){c[p.humor]=(c[p.humor]||0)+1});
     var n=posts.length||1,score=(c.sobe-c.desce)/n;
@@ -453,7 +677,7 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-block:20px 36px;
     if(state.cat!=='Tudo'&&f&&f.cat===state.cat)list.unshift(f);
     $('feed').innerHTML=list.map(function(p){var lido=lidos.indexOf(p._i)>=0;
       return '<article class="post'+(lido?' read':'')+'" data-i="'+p._i+'">'+
-        '<div class="cover" data-story="'+p._i+'" role="button" tabindex="0" aria-label="Abrir em stories: '+esc(p.titulo)+'">'+cover(p,'c'+p._i)+'<span class="mood '+esc(p.humor)+'">'+(MOOD[p.humor]||'')+'</span></div>'+
+        '<div class="cover" data-story="'+p._i+'" role="button" tabindex="0" aria-label="Abrir em modo histórias: '+esc(p.titulo)+'">'+cover(p,'c'+p._i)+'<span class="mood '+esc(p.humor)+'">'+(MOOD[p.humor]||'')+'</span></div>'+
         '<div class="body"><div class="meta"><span class="cat">'+esc(p.cat)+'</span><span class="time">· '+readTime(p)+'</span></div>'+
         '<h3>'+esc(p.titulo)+'</h3><p class="txt">'+esc(p.texto)+'</p>'+
         ((p.tickers&&p.tickers.length)?'<div class="tickers">'+p.tickers.map(function(k){return '<span class="tk"><b>'+esc(k.s)+'</b><span class="'+cls(k.v)+'">'+pct(k.v)+'</span></span>'}).join('')+'</div>':'')+
@@ -463,12 +687,12 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding-block:20px 36px;
     var mx=Math.max.apply(null,(dia.mercados||[]).map(function(m){return Math.abs(+m.var||0)}).concat([.5]));
     $('tiles').innerHTML=(dia.mercados||[]).map(function(m){var v=+m.var||0,w=Math.abs(v)/mx*50,val=/^[A-Z]{2,4}$/.test(m.valor||'')?'':m.valor;
       return '<div class="tile"><span class="n">'+esc(m.nome)+'</span><span class="v">'+esc(val||pct(v))+'</span><span class="c '+cls(v)+'">'+(v>0?'▲ ':v<0?'▼ ':'')+pct(v)+'</span><span class="zbar"><i style="'+(v>=0?'left:50%':'left:'+(50-w)+'%')+';width:'+w.toFixed(1)+'%;background:'+(v>=0?'var(--up)':'var(--down)')+'"></i></span></div>'}).join('');
-    $('numsnote').textContent='Valores intradiários · '+(dia.atualizado||'');
+    $('numsnote').textContent='Valores durante a sessão · '+(dia.atualizado||'');
     progress();
   }
   function progress(){var dia=curDia();if(!dia)return;var n=(dia.posts||[]).length,l=getLidos().length;$('progtxt').textContent=l+' de '+n+' lidas'+(l>=n&&n?' · dia completo ✓':'');$('progbar').style.width=(n?Math.round(l/n*100):0)+'%'}
 
-  /* ---------- Stories ---------- */
+  /* ---------- Histórias ---------- */
   var sv={list:[],i:0,timer:null,start:0,paused:false,elapsed:0,DUR:9000};
   function openStories(fromIdx,cat){
     var dia=curDia();if(!dia)return;
