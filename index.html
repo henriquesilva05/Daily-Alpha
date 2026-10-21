@@ -517,6 +517,7 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
     return sessP.then(function(s){if(!s)throw {code:'not_granted'};return fetch('/api/explain',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token},body:JSON.stringify({ctx:ctx}),signal:opts&&opts.signal})}).then(function(r){if(r.status===401)throw {code:'not_granted'};if(r.status===429)throw {code:'rate_limited'};if(r.status===503)throw {code:'not_configured'};if(!r.ok)throw {code:'upstream_error'};return r.json()}).then(function(j){var t=j.text||'';if(opts&&opts.onText)opts.onText({text:t,delta:t});return {text:t,truncated:false}})}
   var NS={user:userNS,db:sb?dbNS:null,mcp:mcpNS,sample:sampleFn};
   window.claude={use:function(n){return Promise.resolve(NS[n]||null)}};
+  window.__newsP=fetch(DA_CONFIG.supabaseUrl+'/rest/v1/site_content?key=eq.news&select=data',{headers:{apikey:DA_CONFIG.supabaseKey,Authorization:'Bearer '+DA_CONFIG.supabaseKey}}).then(function(r){return r.ok?r.json():null}).then(function(rows){return rows&&rows[0]?rows[0].data:null}).catch(function(){return null});
   window.__daAuth={
     signIn:function(email,pw){return sb.auth.signInWithPassword({email:email,password:pw})},
     signUp:function(email,pw,name){return sb.auth.signUp({email:email,password:pw,options:{data:{full_name:name||''},emailRedirectTo:location.origin}})},
@@ -2899,7 +2900,7 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 </script>
 
 <script>
-(function(){
+window.__daNews=function(){
   var DATA={dias:[]};
   try{DATA=JSON.parse(document.getElementById('dados').textContent)}catch(e){}
   var dias=(DATA.dias||[]).slice().sort(function(a,b){return a.data<b.data?1:-1});
@@ -3141,10 +3142,10 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
   },true);
 
   render();
-})();
+};
 </script>
 <script>
-(function(){
+window.__daTabs=function(){
 'use strict';
 /* ================= Utilidades ================= */
 var $=function(id){return document.getElementById(id)};
@@ -3700,6 +3701,12 @@ $('pf-sform').addEventListener('submit',function(e){e.preventDefault();doSearch(
 $('pf-tform').addEventListener('submit',submitTx);
 renderQuick();renderAuth();initAuth();initStore();renderAgenda();watchNews();markNews();
 var h0=(location.hash||'').replace('#','');if(h0==='portfolio')setTab('pf',false);else if(h0==='pesquisa')setTab('sr',false);else if(h0==='aprender')setTab('ap',false);
+};
+(function(){
+  /* Arranque: vai buscar as notícias mais recentes ao Supabase; se falhar, usa as que vêm no ficheiro. */
+  var done=false;function boot(data){if(done)return;done=true;try{if(data&&Array.isArray(data.dias)&&data.dias.length){var el=document.getElementById('dados');var cur=null;try{cur=JSON.parse(el.textContent)}catch(e){}var newer=!cur||!cur.dias||!cur.dias.length||String(data.dias[0].data)>=String(cur.dias[0].data);if(newer){var t=JSON.stringify(data).replace(/</g,'\\u003c');el.textContent=t}}}catch(e){}window.__daNews();window.__daTabs()}
+  setTimeout(function(){boot(null)},3500);
+  (window.__newsP||Promise.resolve(null)).then(boot,function(){boot(null)});
 })();
 </script>
 
