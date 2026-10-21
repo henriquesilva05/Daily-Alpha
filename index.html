@@ -3704,7 +3704,12 @@ var h0=(location.hash||'').replace('#','');if(h0==='portfolio')setTab('pf',false
 };
 (function(){
   /* Arranque: vai buscar as notícias mais recentes ao Supabase; se falhar, usa as que vêm no ficheiro. */
-  var done=false;function boot(data){if(done)return;done=true;try{if(data&&Array.isArray(data.dias)&&data.dias.length){var el=document.getElementById('dados');var cur=null;try{cur=JSON.parse(el.textContent)}catch(e){}var newer=!cur||!cur.dias||!cur.dias.length||String(data.dias[0].data)>=String(cur.dias[0].data);if(newer){var t=JSON.stringify(data).replace(/</g,'\\u003c');el.textContent=t}}}catch(e){}window.__daNews();window.__daTabs()}
+  var done=false;function boot(data){if(done)return;done=true;try{if(data&&Array.isArray(data.dias)&&data.dias.length){var el=document.getElementById('dados');var cur={dias:[],glossario:[],agenda:[]};try{cur=JSON.parse(el.textContent)||cur}catch(e){}
+    var by={};(cur.dias||[]).forEach(function(d){if(d&&d.data)by[d.data]=d});data.dias.forEach(function(d){if(d&&d.data)by[d.data]=d});
+    var dias=Object.keys(by).sort().reverse().slice(0,30).map(function(k){return by[k]});
+    var gl=(data.glossario||[]).slice(),seen={};gl.forEach(function(g){if(g&&g.palavra)seen[String(g.palavra).toLowerCase()]=1});(cur.glossario||[]).forEach(function(g){if(g&&g.palavra&&!seen[String(g.palavra).toLowerCase()])gl.push(g)});
+    var ag=(data.agenda&&data.agenda.length)?data.agenda:(cur.agenda||[]);
+    el.textContent=JSON.stringify({dias:dias,glossario:gl,agenda:ag})}}catch(e){}window.__daNews();window.__daTabs()}
   setTimeout(function(){boot(null)},3500);
   (window.__newsP||Promise.resolve(null)).then(boot,function(){boot(null)});
 })();
