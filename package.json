@@ -1,0 +1,6 @@
+{
+  "name": "daily-alpha",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}
