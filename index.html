@@ -529,6 +529,45 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 </script>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script>
+/* Estatísticas: Microsoft Clarity (mapas de calor e gravações) e PostHog (cliques, contas e funis).
+   Preenche os dois códigos abaixo; enquanto estiverem vazios, nada é carregado. São públicos por natureza. */
+window.DA_ANALYTICS={clarityId:'z2qqm1ps1g',posthogKey:'phc_pPBkjex6jEQVFkYCtWsxKmvsePCnfm2PFQqun2iyMbEy',posthogHost:'https://eu.i.posthog.com'};
+(function(){
+  var C=window.DA_ANALYTICS;
+  if(C.clarityId){(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,'clarity','script',C.clarityId)}
+  if(C.posthogKey){
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister identify alias set_config reset opt_in_capturing opt_out_capturing has_opted_out_capturing get_distinct_id people.set people.set_once".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init(C.posthogKey,{api_host:C.posthogHost,person_profiles:'identified_only',autocapture:true,capture_pageview:true,capture_pageleave:true});
+  }
+  function track(name,props){try{if(window.posthog&&C.posthogKey)posthog.capture(name,props||{})}catch(e){}try{if(window.clarity&&C.clarityId)clarity('event',name)}catch(e){}try{window.va&&window.va('event',{name:name,data:props||{}})}catch(e){}}
+  window.daTrack=track;
+  /* Liga a visita à conta, quando há sessão iniciada (só o id interno e o email). */
+  function ident(u){if(!u)return;try{if(window.posthog&&C.posthogKey)posthog.identify(u.id,{email:u.email||undefined,criado_em:u.created_at})}catch(e){}try{if(window.clarity&&C.clarityId)clarity('identify',u.id)}catch(e){}}
+  var sb=window.__sb;
+  if(sb){sb.auth.getSession().then(function(r){var s=r&&r.data&&r.data.session;if(s)ident(s.user)}).catch(function(){});
+    sb.auth.onAuthStateChange(function(ev,s){if(ev==='SIGNED_IN'&&s)ident(s.user);if(ev==='SIGNED_OUT'){try{window.posthog&&C.posthogKey&&posthog.reset()}catch(e){}}})}
+  /* Registos e entradas */
+  var A=window.__daAuth;
+  if(A){var su=A.signUp,si=A.signIn;
+    A.signUp=function(e,p,n){return su(e,p,n).then(function(r){if(r&&!r.error){track('conta_criada');if(r.data&&r.data.user)ident(r.data.user)}else track('erro_criar_conta');return r})};
+    A.signIn=function(e,p){return si(e,p).then(function(r){track(r&&!r.error?'sessao_iniciada':'erro_iniciar_sessao');return r})}}
+  /* Cliques mais importantes */
+  document.addEventListener('click',function(e){var t=e.target,el;if(!t||!t.closest)return;
+    if((el=t.closest('.tab')))return track('aba',{aba:el.getAttribute('data-tab')});
+    if(t.closest('#openStories'))return track('modo_historias',{origem:'botao'});
+    if((el=t.closest('[data-scat]')))return track('modo_historias',{origem:'bolha',tema:el.getAttribute('data-scat')});
+    if((el=t.closest('[data-read]')))return track('marcar_lido');
+    if((el=t.closest('[data-auth]')))return track('botao_conta',{acao:el.getAttribute('data-auth')});
+    if((el=t.closest('[data-pf-act]')))return track('portfolio',{acao:el.getAttribute('data-pf-act')});
+    if((el=t.closest('[data-sr-act]')))return track('pesquisa',{acao:el.getAttribute('data-sr-act')});
+    if((el=t.closest('[data-c]')))return track('filtro_tema',{tema:el.getAttribute('data-c')});
+    if((el=t.closest('[data-d]')))return track('arquivo_dia',{dia:el.getAttribute('data-d')});
+    if((el=t.closest('.post-foot a')))return track('abrir_fonte');
+    if(t.closest('#term'))return track('termo_do_dia');
+  },true);
+})();
+</script>
 </head>
 <body>
 <header class="topbar">
@@ -691,6 +730,800 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 <script type="application/json" id="dados">
 {
 "dias": [
+{
+"data": "2026-10-24",
+"atualizado": "24 out, 09:50 (Lisboa)",
+"semana": true,
+"resumo": "Semana de nervos: a Meta arrastou o Nasdaq, o Brent subiu 6% para os 116 dólares, a Europa teve a pior semana desde setembro, Lisboa perdeu 2,4% e França escapou ao corte da Moody's. Na próxima semana decidem a Fed e o BCE.",
+"termo": {
+"palavra": "Perspetiva negativa",
+"definicao": "É um aviso que uma agência de notação dá quando mantém a nota de um país ou de uma empresa, mas admite cortá-la mais à frente. Não muda nada de imediato, mas mostra que a agência está preocupada com as contas."
+},
+"mercados": [
+{
+"nome": "S&P 500 (semana)",
+"valor": "7.623,68",
+"var": -0.47
+},
+{
+"nome": "Nasdaq (semana)",
+"valor": "25.955,34",
+"var": -0.71
+},
+{
+"nome": "Dow Jones (semana)",
+"valor": "52.215,16",
+"var": 0.41
+},
+{
+"nome": "Stoxx 600 (semana)",
+"valor": "635,77",
+"var": -1.4
+},
+{
+"nome": "PSI (semana)",
+"valor": "9.244,62",
+"var": -2.36
+},
+{
+"nome": "Petróleo Brent (semana)",
+"valor": "$116,72",
+"var": 6.24
+},
+{
+"nome": "Ouro (semana)",
+"valor": "$3.996",
+"var": -3.5
+},
+{
+"nome": "Bitcoin (semana)",
+"valor": "$80.806",
+"var": -0.64
+},
+{
+"nome": "EUR/USD (semana)",
+"valor": "1,1204",
+"var": -0.24
+}
+],
+"posts": [
+{
+"cat": "Economia",
+"humor": "desce",
+"titulo": "Semana agitada deixa Wall Street dividida",
+"texto": "O S&P 500 terminou a semana a perder 0,47%, nos 7.623,68 pontos, e o Nasdaq 0,71%, nos 25.955,34, depois de na quinta-feira ter tido a maior queda num só dia desde junho, com a Meta a afundar quase 7%. O Dow Jones ganhou 0,41%, apesar de ter caído 1,2% na sexta-feira, e as pequenas empresas do Russell 2000 subiram 2%, pondo fim a seis semanas seguidas de quedas.",
+"tickers": [
+{
+"s": "S&P 500 (semana)",
+"v": -0.47
+},
+{
+"s": "Nasdaq (semana)",
+"v": -0.71
+},
+{
+"s": "Dow (semana)",
+"v": 0.41
+},
+{
+"s": "Russell 2000 (semana)",
+"v": 2.0
+}
+],
+"explica": "O Russell 2000 junta 2.000 empresas americanas mais pequenas. Quando sobe enquanto as gigantes da tecnologia caem, é sinal de que os investidores estão a tirar dinheiro das grandes tecnológicas e a espalhá-lo por outras empresas.",
+"fonte": {
+"nome": "AP via Rallies.ai",
+"url": "https://rallies.ai/news/volatile-week-modest-results-for-wall-streets-main-indexes-6ba89f32a2b41463"
+}
+},
+{
+"cat": "Energia",
+"humor": "desce",
+"titulo": "Brent sobe 6% numa semana e chega aos 116 dólares",
+"texto": "O Brent fechou a sexta-feira nos 116,72 dólares por barril, a subir 3,14%, o valor de fecho mais alto desde 29 de abril, e ganhou cerca de 6% na semana. Os ataques dos Houthis a instalações de energia na Arábia Saudita, que levaram a Aramco a evacuar a sede, e os ataques a petroleiros perto de Ormuz explicam a subida. Os EUA autorizaram uma troca de emergência de até 400 mil barris da sua reserva estratégica.",
+"tickers": [
+{
+"s": "Brent",
+"v": 3.14
+},
+{
+"s": "WTI",
+"v": 3.8
+}
+],
+"explica": "Muitos analistas dizem que o petróleo que sai de Ormuz até aumentou: o preço sobe sobretudo por medo do que pode acontecer. Se a tensão acalmar, parte dessa subida pode desaparecer depressa.",
+"fonte": {
+"nome": "FinanceFeeds",
+"url": "https://financefeeds.com/brent-crude-oil-price-116-72-saturday-week-ahead-houthi-saudi-fed-28-october-bull-120-bear-108/"
+}
+},
+{
+"cat": "Europa",
+"humor": "desce",
+"titulo": "Europa tem a pior semana desde o início de setembro",
+"texto": "O Stoxx 600 fechou a sexta-feira nos 635,77 pontos (-0,31%) e perdeu cerca de 1,4% na semana, a maior queda semanal desde o início de setembro. A Kering, dona da Gucci, afundou 16,6% e a Volvo Cars cerca de 24%, para um mínimo histórico, depois de um prejuízo maior do que o esperado e do anúncio de 2.500 despedimentos. Do lado positivo, a L'Oréal subiu 5,6% com vendas acima do previsto.",
+"tickers": [
+{
+"s": "Stoxx 600 (semana)",
+"v": -1.4
+},
+{
+"s": "Kering",
+"v": -16.6
+},
+{
+"s": "L'Oréal",
+"v": 5.6
+}
+],
+"explica": "Na época de resultados, as ações reagem com força às contas. Quando várias empresas grandes desiludem na mesma semana, e ao mesmo tempo há crise política em França e petróleo caro, o índice europeu inteiro acaba por cair.",
+"fonte": {
+"nome": "Reuters via Investing.com",
+"url": "https://www.investing.com/news/stock-market-news/stoxx-600-extends-fall-as-kering-slumps-oil-climbs-4968205"
+}
+},
+{
+"cat": "Portugal",
+"humor": "desce",
+"titulo": "Lisboa perde mais de 2% numa semana difícil",
+"texto": "O PSI fechou a sexta-feira praticamente igual (+0,07%), nos 9.244,62 pontos, mas perdeu 2,36% na semana, depois de ter ganho 2,17% na anterior. Na sexta-feira, a Galp liderou com uma subida de 3,42%, para 22,96 euros, à boleia do petróleo, enquanto a Navigator caiu 3,16%, para 2,94 euros, no dia seguinte a mostrar uma queda de quase 45% nos lucros.",
+"tickers": [
+{
+"s": "PSI (semana)",
+"v": -2.36
+},
+{
+"s": "GALP",
+"v": 3.42
+},
+{
+"s": "NVG",
+"v": -3.16
+}
+],
+"explica": "A Galp é uma petrolífera e ganha mais quando o barril sobe, por isso pode subir num dia em que o resto da bolsa está nervoso. Já a Navigator gasta muita energia a fazer papel e sofre com o mesmo petróleo caro.",
+"fonte": {
+"nome": "Jornal Económico",
+"url": "https://jornaleconomico.sapo.pt/noticias/bolsa-de-lisboa-fecha-semana-no-verde-com-galp-energia-a-subir-mais-de-3/"
+}
+},
+{
+"cat": "Juros",
+"humor": "sobe",
+"titulo": "França escapa ao corte da Moody's, mas fica sob aviso",
+"texto": "Depois do fecho de sexta-feira, a Moody's manteve a nota da dívida francesa em Aa3, ao contrário do que a maioria dos analistas esperava, mas deixou a perspetiva negativa. A agência avisa que a subida dos juros, com o de 10 anos a passar os 5% esta semana, torna a dívida francesa mais cara de pagar. O primeiro-ministro, Sébastien Lecornu, quer agora aprovar um orçamento com o objetivo de um défice de 5% no fim do ano.",
+"tickers": [],
+"explica": "Uma nota de crédito diz se um país é bom pagador. Manter a nota evita, para já, que alguns fundos sejam obrigados a vender dívida francesa, o que podia fazer subir ainda mais os juros que França paga.",
+"fonte": {
+"nome": "Seoul Economic Daily",
+"url": "https://en.sedaily.com/finance/2026/10/24/france-dodges-downgrade-as-moodys-keeps-aa3-rating"
+}
+},
+{
+"cat": "Empresas",
+"humor": "desce",
+"titulo": "SpaceX abana as operadoras de telemóvel americanas",
+"texto": "Na sexta-feira, a AT&T perdeu 7,96% e a T-Mobile 7,71%, depois de a Bloomberg noticiar que a SpaceX está a negociar o acesso a cerca de 80 mil torres de telemóvel nos EUA, o que pode abrir caminho a uma quarta operadora. A Crown Castle, dona de muitas dessas torres, disparou 9,06%.",
+"tickers": [
+{
+"s": "T",
+"v": -7.96
+},
+{
+"s": "TMUS",
+"v": -7.71
+},
+{
+"s": "CCI",
+"v": 9.06
+}
+],
+"explica": "Quando um concorrente com muito dinheiro ameaça entrar num mercado, os investidores temem uma guerra de preços e lucros menores para as empresas que já lá estão. Já quem lhe aluga as torres pode ganhar um novo cliente.",
+"fonte": {
+"nome": "Capp Notes",
+"url": "https://cappnotes.substack.com/p/closing-look-friday-october-23-2026"
+}
+},
+{
+"cat": "Moeda",
+"humor": "desce",
+"titulo": "Euro recua com a economia francesa a encolher",
+"texto": "O euro perdeu 0,24% na semana e fechou perto dos 1,1204 dólares. Na sexta-feira, os índices de atividade (PMI) mostraram que a economia francesa encolheu inesperadamente em outubro, com o indicador geral nos 48,4 pontos, e o da zona euro abrandou para 51,9, abaixo dos 52,7 esperados.",
+"tickers": [
+{
+"s": "EUR/USD (semana)",
+"v": -0.24
+}
+],
+"explica": "Os PMI são inquéritos às empresas: acima de 50 pontos, a atividade está a crescer; abaixo, a encolher. Dados fracos na zona euro levam alguns investidores a trocar euros por dólares.",
+"fonte": {
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/newsquawk-european-market-wrap---23rd-october-2026"
+}
+},
+{
+"cat": "Ouro",
+"humor": "desce",
+"titulo": "Ouro cai cerca de 3,5% e perde os 4.000 dólares",
+"texto": "O ouro terminou a semana perto dos 3.996 dólares por onça, abaixo da fasquia dos 4.000, com uma perda de cerca de 3,5%. A prata também recuou, para perto dos 53,90 dólares. Com o petróleo acima dos 117 dólares, os investidores temem mais inflação e apostam em juros altos durante mais tempo.",
+"tickers": [
+{
+"s": "Ouro (semana)",
+"v": -3.5
+}
+],
+"explica": "O ouro não paga juros. Quando se espera que os juros fiquem altos, as obrigações tornam-se mais atrativas e o ouro perde brilho, mesmo em semanas de tensão no mundo.",
+"fonte": {
+"nome": "Kitco",
+"url": "https://www.kitco.com/news/article/2026-10-23/gold-silver-extend-weekly-losses-hormuz-tensions-push-crude-above-116-kitco"
+}
+},
+{
+"cat": "Cripto",
+"humor": "desce",
+"titulo": "Bitcoin cai abaixo da média de 50 dias pela primeira vez em dois meses",
+"texto": "No sábado de manhã, a bitcoin estava nos 80.806 dólares, menos 0,64% numa semana e menos 0,97% em 24 horas. Desceu abaixo da média dos últimos 50 dias pela primeira vez em 66 dias, depois de os ETF de bitcoin nos EUA terem perdido mais de 635 milhões de dólares em levantamentos num só dia.",
+"tickers": [
+{
+"s": "BTC (semana)",
+"v": -0.64
+}
+],
+"explica": "A média móvel de 50 dias é a média dos preços de fecho desses dias. Muitos investidores olham para ela como sinal de tendência: cair abaixo dela é visto como um mau sinal, mas não quer dizer que a queda vá continuar.",
+"fonte": {
+"nome": "CryptoTicker",
+"url": "https://cryptoticker.io/en/bitcoin-price-50-day-moving-average-24-october-2026/"
+}
+},
+{
+"cat": "Energia",
+"humor": "neutro",
+"titulo": "Fim de semana tenso no Golfo",
+"texto": "No sábado, a coligação liderada pela Arábia Saudita disse ter destruído um míssil balístico dos Houthis dirigido a Riade. O chefe das Forças Armadas iranianas avisou que não vai deixar navios militares americanos entrar no Golfo, e os Guardas da Revolução dizem que quatro navios foram atingidos e outros três bateram em minas perto de Ormuz.",
+"tickers": [],
+"explica": "As bolsas estão fechadas ao fim de semana, mas as notícias continuam. O que acontecer até domingo à noite pode fazer o petróleo abrir a subir ou a descer na segunda-feira.",
+"fonte": {
+"nome": "Al Jazeera",
+"url": "https://www.aljazeera.com/news/liveblog/2026/10/24/iran-war-live-israel-launches-targeted-hebron-operation-after-attack"
+}
+},
+{
+"cat": "Juros",
+"humor": "neutro",
+"titulo": "Fed, BCE e Banco do Japão decidem os juros na mesma semana",
+"texto": "Na quarta-feira, a Fed deverá manter os juros entre 3,75% e 4%: 94 de 100 economistas ouvidos pela Reuters esperam isso. O BCE decide na quinta-feira e não se espera uma subida, e o Banco do Japão deverá manter os juros em 1,25% na sexta-feira. Na quinta-feira saem ainda o PIB americano do 3.º trimestre, com uma previsão de 3%, e a inflação PCE, que deverá subir para 3,6%.",
+"tickers": [],
+"explica": "Quando toda a gente já espera que os juros fiquem iguais, o que mexe com os mercados é o que os bancos centrais dizem sobre as próximas reuniões. Uma frase sobre uma subida em dezembro pode pesar mais do que a decisão em si.",
+"fonte": {
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/week-in-focus-26-30th-october-2026-fomc-boc-rbnz-ecb-boj-policy-decisions-us-pce"
+}
+},
+{
+"cat": "Empresas",
+"humor": "neutro",
+"titulo": "Microsoft, Alphabet, Amazon e Galp abrem as contas",
+"texto": "A Microsoft e a Alphabet apresentam resultados na quarta-feira e a Amazon na quinta, todas depois do fecho de Wall Street, e a Apple na segunda-feira seguinte, 2 de novembro. Em Lisboa, a Galp abre a semana na segunda-feira e o BCP e a Jerónimo Martins seguem-se na quarta. Atenção: Portugal atrasa o relógio este domingo e os EUA só a 1 de novembro, por isso esta semana Wall Street abre às 13:30 de Lisboa.",
+"tickers": [],
+"explica": "Depois do susto com a Meta, os investidores vão olhar sobretudo para quanto estas gigantes planeiam gastar em centros de dados para inteligência artificial e se esse investimento já está a trazer receitas.",
+"fonte": {
+"nome": "StockTitan",
+"url": "https://www.stocktitan.net/articles/earnings-calendar-week-of-october-26-2026"
+}
+}
+]
+},
+{
+"data": "2026-10-23",
+"atualizado": "23 out, 09:50 (Lisboa)",
+"resumo": "A Meta afunda 7% e arrasta o Nasdaq para a pior queda desde junho, o Brent passa os 114 dólares com a Aramco a evacuar a sede, a Kering tomba 10% na Europa e o lucro da Navigator cai quase 45%.",
+"termo": {
+"palavra": "Fluxo de caixa livre",
+"definicao": "É o dinheiro que sobra a uma empresa depois de pagar as despesas do dia a dia e os investimentos, como fábricas ou centros de dados. Se for negativo, a empresa está a gastar mais do que o negócio gera e pode ter de pedir dinheiro emprestado."
+},
+"mercados": [
+{
+"nome": "Futuros S&P 500",
+"valor": "EUA",
+"var": 0.06
+},
+{
+"nome": "Futuros Nasdaq 100",
+"valor": "EUA",
+"var": -0.1
+},
+{
+"nome": "Futuros Dow Jones",
+"valor": "EUA",
+"var": 0.1
+},
+{
+"nome": "Stoxx 600",
+"valor": "636,50",
+"var": -0.13
+},
+{
+"nome": "Petróleo Brent",
+"valor": "$114,47",
+"var": 1.2
+},
+{
+"nome": "Ouro",
+"valor": "$4.022",
+"var": -0.09
+},
+{
+"nome": "Bitcoin",
+"valor": "$81.838",
+"var": 0.52
+},
+{
+"nome": "EUR/USD",
+"valor": "1,1191",
+"var": -0.22
+}
+],
+"posts": [
+{
+"cat": "Tecnologia",
+"humor": "desce",
+"titulo": "Meta afunda 7% e o Nasdaq tem o pior dia desde junho",
+"texto": "Na quinta-feira, o Nasdaq caiu 2,60%, para 26.008,86 pontos, a maior queda num só dia desde junho, e o S&P 500 perdeu 1,21%, para 7.663,43. A Meta afundou 6,98% e a Lam Research 11,76%, com o medo de que os gastos em inteligência artificial não deem retorno. O Dow escapou (+0,02%, para 52.873,28) graças à Procter & Gamble (+5,58%) e à Lockheed Martin (cerca de +7%), que apresentaram boas contas.",
+"tickers": [
+{
+"s": "Nasdaq",
+"v": -2.6
+},
+{
+"s": "S&P 500",
+"v": -1.21
+},
+{
+"s": "META",
+"v": -6.98
+},
+{
+"s": "PG",
+"v": 5.58
+}
+],
+"explica": "Quando uma tecnológica gigante como a Meta cai muito, arrasta o Nasdaq, onde pesa bastante. Já o Dow tem mais empresas de consumo e indústria, por isso pode ficar estável no mesmo dia.",
+"fonte": {
+"nome": "TradingKey",
+"url": "https://www.tradingkey.com/analysis/stocks/us-stocks/262234781-nasdaq-down-2-60-meta-drops-7-percent-oil-above-113-gold-nears-4000-tradingkey"
+}
+},
+{
+"cat": "Empresas",
+"humor": "desce",
+"titulo": "Meta gasta mais em IA do que o negócio lhe dá",
+"texto": "No trimestre, a Meta investiu 34,91 mil milhões de dólares, sobretudo em centros de dados, mais do que os 32,79 mil milhões que o negócio gerou, e o fluxo de caixa livre ficou negativo em 2,12 mil milhões. Para o ano inteiro, prevê investir entre 135 e 145 mil milhões. A empresa vai ainda dar uma ação nova sem direito de voto por cada ação atual, a partir de 19 de janeiro de 2027.",
+"tickers": [
+{
+"s": "META",
+"v": -6.98
+}
+],
+"explica": "Os investidores aceitam que uma empresa gaste muito a pensar no futuro, mas ficam nervosos quando os gastos passam o dinheiro que entra. Isso pode obrigar a empresa a endividar-se ou a emitir novas ações.",
+"fonte": {
+"nome": "SiliconANGLE",
+"url": "https://siliconangle.com/2026/10/21/meta-beats-on-revenue-and-splits-its-stock-two-for-one-with-non-voting-class-c-shares/"
+}
+},
+{
+"cat": "Energia",
+"humor": "desce",
+"titulo": "Brent passa os 114 dólares e a Aramco evacua a sede",
+"texto": "Esta manhã, o Brent subia 1,2%, para 114,47 dólares por barril, e o WTI americano 1,4%, para 100,84 dólares, a caminho da terceira semana seguida de subidas. A Saudi Aramco mandou evacuar a sede, em Dhahran, depois de os combates entre a Arábia Saudita e os Houthis se intensificarem, e na Líbia o fecho de um oleoduto cortou a produção de dois campos.",
+"tickers": [
+{
+"s": "Brent",
+"v": 1.2
+},
+{
+"s": "WTI",
+"v": 1.4
+}
+],
+"explica": "A Aramco é a maior petrolífera do mundo. Quando há combates perto das suas instalações, os compradores temem falhas no abastecimento e pagam mais pelo barril, mesmo que a produção ainda não tenha parado.",
+"fonte": {
+"nome": "Business Recorder (Reuters)",
+"url": "https://www.brecorder.com/news/40445578/oil-prices-rise-more-than-1-as-supply-concerns-linger"
+}
+},
+{
+"cat": "Europa",
+"humor": "desce",
+"titulo": "Gucci volta a desiludir e a Kering tomba 10%",
+"texto": "A Kering, dona da Gucci, caía 10,4%, porque as vendas da marca recuaram 6% no terceiro trimestre, para 1,29 mil milhões de euros, apesar do plano de recuperação. Do lado positivo, a Holcim subia 5,2% depois de melhorar as previsões para o ano. O Stoxx 600 recuava 0,13%, para 636,50 pontos, depois da maior queda diária em três semanas, na quinta-feira.",
+"tickers": [
+{
+"s": "Stoxx 600",
+"v": -0.13
+},
+{
+"s": "Kering",
+"v": -10.4
+},
+{
+"s": "Holcim",
+"v": 5.2
+}
+],
+"explica": "Quando uma empresa anuncia um plano de recuperação, os investidores esperam ver melhorias nas contas seguintes. Se elas não chegam, perdem a paciência e vendem as ações.",
+"fonte": {
+"nome": "Reuters via Yahoo Finance",
+"url": "https://finance.yahoo.com/markets/world-indices/articles/stoxx-600-extends-fall-kering-073024331.html"
+}
+},
+{
+"cat": "Portugal",
+"humor": "desce",
+"titulo": "Lucro da Navigator cai quase 45% com a energia cara",
+"texto": "A Navigator lucrou 65,4 milhões de euros nos primeiros nove meses do ano, menos 44,8% do que os 118,3 milhões de 2025, com as vendas a cair 10,5%. A papeleira pede ao Governo apoios para a indústria semelhantes aos de 2022 e 2023, por causa da subida dos custos da energia. As contas saíram depois do fecho de quinta-feira, por isso a reação na bolsa vê-se hoje.",
+"tickers": [],
+"explica": "Fazer papel gasta muita energia. Quando a eletricidade e o gás ficam mais caros, os custos sobem e, se a empresa não conseguir subir os preços na mesma medida, o lucro encolhe.",
+"fonte": {
+"nome": "Jornal de Negócios",
+"url": "https://www.jornaldenegocios.pt/empresas/industria/detalhe/navigator-ve-lucro-cair-para-65-milhoes-e-pede-apoios-face-aos-custos-da-energia"
+}
+},
+{
+"cat": "Portugal",
+"humor": "desce",
+"titulo": "Lisboa fechou a cair 1,46%, só a Jerónimo Martins subiu",
+"texto": "Na quinta-feira, o PSI fechou a perder 1,46%, nos 9.237,82 pontos, com 15 das 16 empresas do índice no vermelho. A Jerónimo Martins foi a única a subir, 0,60%, para 18,42 euros.",
+"tickers": [
+{
+"s": "PSI",
+"v": -1.46
+},
+{
+"s": "JMT",
+"v": 0.6
+}
+],
+"explica": "Quando quase todas as ações de um índice caem no mesmo dia, o problema costuma ser geral, como o petróleo caro ou o medo nas bolsas lá fora, e não um problema de uma empresa em particular.",
+"fonte": {
+"nome": "Executive Digest",
+"url": "https://executivedigest.sapo.pt/bolsa-de-lisboa-fecha-em-queda-de-146/"
+}
+},
+{
+"cat": "Europa",
+"humor": "neutro",
+"titulo": "Moody's decide hoje a nota de França",
+"texto": "A agência Moody's revê esta sexta-feira a nota da dívida francesa, e a maioria dos economistas espera um corte. O juro das obrigações francesas a 10 anos passou os 5% esta semana, pela primeira vez desde 2002, e a diferença face à Alemanha chegou a perto de 1,6 pontos percentuais. A dívida pública de França ronda 120% do PIB.",
+"tickers": [],
+"explica": "Uma nota de crédito diz aos investidores se um país é um bom pagador. Se a nota baixar, alguns fundos só podem comprar dívida com notas altas e vendem, o que faz subir os juros que o país paga.",
+"fonte": {
+"nome": "Euronews",
+"url": "https://www.euronews.com/2026/10/21/french-government-10-year-bond-yield-tops-5-for-first-time-since-2002"
+}
+},
+{
+"cat": "Juros",
+"humor": "sobe",
+"titulo": "Juro americano a 10 anos tem a maior queda desde 2023",
+"texto": "O juro das obrigações do Tesouro americano a 10 anos desceu mais de 0,19 pontos de um dia para o outro, a maior queda desde março de 2023, e voltou para baixo dos 5%, perto de 4,97%. Os investidores reduziram as apostas em novas subidas de juros da Fed: a probabilidade de uma subida em dezembro baixou para 85%.",
+"tickers": [],
+"explica": "Quando há medo nas bolsas, muitos investidores trocam ações por obrigações, que são vistas como mais seguras. Com mais compradores, o juro das obrigações desce, o que torna os empréstimos um pouco mais baratos.",
+"fonte": {
+"nome": "MarketScreener (Reuters)",
+"url": "https://www.marketscreener.com/news/asian-shares-wobble-as-tech-rout-boosts-bonds-dents-rate-hike-bets-ce785cdede8df127"
+}
+},
+{
+"cat": "Ouro",
+"humor": "desce",
+"titulo": "Ouro cai quase 3% e aproxima-se dos 4.000 dólares",
+"texto": "Na quinta-feira, o ouro perdeu cerca de 2,9%, para perto de 4.019 dólares por onça, e a prata caiu quase 6%, para 54,44 dólares. Os pedidos de subsídio de desemprego nos EUA desceram para 194 mil, abaixo dos 200 mil esperados, o que reforça a ideia de que a Fed vai manter os juros altos. Esta manhã, o ouro estava estável perto dos 4.022 dólares.",
+"tickers": [
+{
+"s": "Ouro",
+"v": -2.88
+},
+{
+"s": "Prata",
+"v": -6.0
+}
+],
+"explica": "Um mercado de trabalho forte dá margem ao banco central para não descer os juros. Como o ouro não paga juros, fica menos atrativo quando se espera que os juros fiquem altos durante mais tempo.",
+"fonte": {
+"nome": "Mitrade",
+"url": "https://www.mitrade.com/insights/commodity-analysis/gold/gold-tumbles-hormuz-jobless-claims-gabelli"
+}
+},
+{
+"cat": "Cripto",
+"humor": "desce",
+"titulo": "Bitcoin perde 3,9% com a queda da tecnologia",
+"texto": "A bitcoin caiu 3,9% na quinta-feira, para 81.350 dólares, ao mesmo tempo que as ações de tecnologia. Esta manhã recuperava ligeiramente e seguia perto dos 81.800 dólares. O euro também recuou 0,2% face ao dólar, para 1,1214.",
+"tickers": [
+{
+"s": "BTC",
+"v": -3.9
+},
+{
+"s": "EUR/USD",
+"v": -0.2
+}
+],
+"explica": "A bitcoin é vista como um investimento de risco, tal como as ações de tecnologia. Quando os investidores ficam com medo, costumam vender as duas ao mesmo tempo.",
+"fonte": {
+"nome": "Bloomberg via Swissinfo",
+"url": "https://www.swissinfo.ch/eng/us-stock-futures-drop-after-earnings,-oil-gains:-markets-wrap/92254614"
+}
+}
+]
+},
+{
+"data": "2026-10-22",
+"atualizado": "22 out, 09:50 (Lisboa)",
+"resumo": "A Tesla cai fora de horas depois de baixar a meta de vendas, a IBM tropeça, o petróleo sobe para os 112 dólares com novos ataques no Golfo e a Europa e Lisboa abrem a cair.",
+"termo": {
+"palavra": "Ações sem direito de voto",
+"definicao": "São ações que te dão uma parte dos lucros da empresa, mas não te deixam votar nas assembleias de acionistas. As empresas usam-nas para angariar dinheiro sem que os fundadores percam o controlo."
+},
+"mercados": [
+{
+"nome": "Futuros S&P 500",
+"valor": "EUA",
+"var": -1.0
+},
+{
+"nome": "Futuros Nasdaq 100",
+"valor": "EUA",
+"var": -1.7
+},
+{
+"nome": "Futuros Dow Jones",
+"valor": "EUA",
+"var": -0.5
+},
+{
+"nome": "Stoxx 600",
+"valor": "639,05",
+"var": -0.84
+},
+{
+"nome": "PSI (Lisboa)",
+"valor": "9.335,15",
+"var": -0.42
+},
+{
+"nome": "Petróleo Brent",
+"valor": "$112,08",
+"var": 3.0
+},
+{
+"nome": "Ouro",
+"valor": "$4.108",
+"var": -1.02
+},
+{
+"nome": "Bitcoin",
+"valor": "$82.789",
+"var": 0.1
+},
+{
+"nome": "EUR/USD",
+"valor": "1,1246",
+"var": 0.12
+}
+],
+"posts": [
+{
+"cat": "Empresas",
+"humor": "desce",
+"titulo": "Tesla cai 4% e baixa a meta de vendas para 5 milhões de carros",
+"texto": "A Tesla teve um lucro por ação de 0,48 dólares, acima dos 0,45 esperados, mas as receitas ficaram nos 28 mil milhões, ligeiramente abaixo das previsões, e o lucro caiu 4%, para 1,7 mil milhões. A empresa quer agora vender 5 milhões de carros por ano até ao fim da década, bem menos do que os 20 milhões de que Musk falava, e cortou o investimento previsto para este ano de 25 para cerca de 20 mil milhões. As ações caíam 4,25% fora de horas, depois de terem subido 3,41% na quarta-feira.",
+"tickers": [
+{
+"s": "TSLA",
+"v": -4.25
+}
+],
+"explica": "Uma empresa pode bater as previsões de lucro e mesmo assim cair na bolsa. Os investidores pagam pela Tesla a pensar no crescimento futuro, por isso uma meta de vendas mais baixa pesa mais do que um bom trimestre.",
+"fonte": {
+"nome": "Investing.com",
+"url": "https://www.investing.com/news/economy-news/metas-revenue-beat-teslas-lower-annual-sales-goal--whats-moving-markets-4964928"
+}
+},
+{
+"cat": "Tecnologia",
+"humor": "sobe",
+"titulo": "Meta fatura acima do esperado e cria ações sem voto",
+"texto": "A Meta faturou 64,6 mil milhões de dólares no trimestre, acima dos 63,31 mil milhões esperados, e prevê entre 73 e 76 mil milhões no último trimestre do ano. O lucro por ação ficou nos 3,83 dólares por causa de uma multa de 9,89 mil milhões; sem ela, seriam 7,40. A empresa vai criar uma nova classe de ações sem direito de voto para financiar a inteligência artificial, e as ações subiam 1,32% fora de horas.",
+"tickers": [
+{
+"s": "META",
+"v": 1.32
+}
+],
+"explica": "Quando uma empresa tem uma despesa extraordinária, como uma multa, os analistas olham também para o lucro sem esse efeito. É uma forma de ver se o negócio do dia a dia continua saudável.",
+"fonte": {
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/newsquawk-daily-european-equity-opening-news---22nd-october-2026"
+}
+},
+{
+"cat": "Economia",
+"humor": "desce",
+"titulo": "Wall Street subiu ontem, mas os futuros apontam para queda",
+"texto": "Na quarta-feira, o S&P 500 ganhou 0,58%, para 7.757,74 pontos, o Nasdaq subiu 1,05%, para 26.701,61, e o Dow avançou 0,69%, com a SpaceX a disparar 7,79% e a Super Micro perto de 10%. Esta manhã, depois das contas da Tesla e da IBM, os futuros do Nasdaq 100 perdiam 1,7%, os do S&P 500 1% e os do Dow 0,5%.",
+"tickers": [
+{
+"s": "S&P 500",
+"v": 0.58
+},
+{
+"s": "Nasdaq",
+"v": 1.05
+},
+{
+"s": "Futuros Nasdaq 100",
+"v": -1.7
+}
+],
+"explica": "Os futuros permitem negociar os índices antes de a bolsa abrir, às 14:30 de Lisboa. Mostram o que os investidores pensam das notícias da noite, mas a sessão pode acabar por correr de forma diferente.",
+"fonte": {
+"nome": "MarketScreener (Reuters)",
+"url": "https://www.marketscreener.com/news/nasdaq-leads-wall-street-to-higher-close-as-spacex-super-micro-boost-ai-sentiment-ce785cd9dd8cf725"
+}
+},
+{
+"cat": "Tecnologia",
+"humor": "desce",
+"titulo": "IBM perde 5% apesar de bater as contas",
+"texto": "A IBM teve um lucro por ação de 2,95 dólares e receitas de 17,1 mil milhões, ambos acima do previsto, mas a área de consultoria ficou aquém e as ações caíam 5% fora de horas. A Lam Research, que faz máquinas para fabricar chips, também recuava apesar de números acima do esperado, enquanto a Texas Instruments ficou praticamente igual.",
+"tickers": [
+{
+"s": "IBM",
+"v": -5.0
+}
+],
+"explica": "Os investidores olham para cada parte do negócio. Se uma área importante, como a consultoria na IBM, corre pior do que o esperado, a ação pode cair mesmo com o total acima das previsões.",
+"fonte": {
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/newsquawk-daily-european-equity-opening-news---22nd-october-2026"
+}
+},
+{
+"cat": "Europa",
+"humor": "desce",
+"titulo": "Europa abre a cair com Barclays e Hermès a desiludir",
+"texto": "O Stoxx 600 recuava 0,84%, para 639,05 pontos, depois de ter subido mais de 0,9% na quarta-feira, com a banca a perder 2,1%. O Barclays caía 2,5% depois de um lucro antes de impostos de 2,3 mil milhões de libras, abaixo dos 2,4 mil milhões esperados, e a Hermès, dona das malas Birkin, afundava 6,7%. Do lado positivo, a Nestlé ganhava 2,3% com vendas acima do previsto.",
+"tickers": [
+{
+"s": "Stoxx 600",
+"v": -0.84
+},
+{
+"s": "Hermès",
+"v": -6.7
+},
+{
+"s": "Barclays",
+"v": -2.5
+},
+{
+"s": "Nestlé",
+"v": 2.3
+}
+],
+"explica": "O crescimento orgânico das vendas, que a Nestlé destacou, conta só o que a empresa vende mais, sem os efeitos de compras de outras empresas ou do câmbio. Mostra se o negócio está mesmo a crescer.",
+"fonte": {
+"nome": "Reuters via Investing.com",
+"url": "https://www.investing.com/news/stock-market-news/stoxx-600-slips-as-barclays-hermes-disappoint-oil-climbs-4964837"
+}
+},
+{
+"cat": "Portugal",
+"humor": "desce",
+"titulo": "BCP pesa em Lisboa no dia das contas da Navigator",
+"texto": "O PSI abriu a descer 0,42%, para 9.335,15 pontos, depois de ter subido 0,46% na quarta-feira. O BCP perdia 1,60%, para 1,104 euros, e a Mota-Engil 1,37%, enquanto a Galp subia 0,49%, para 22,64 euros, à boleia do petróleo. A Navigator, que estava estável, é a primeira empresa do PSI a apresentar as contas do terceiro trimestre: até junho, o lucro tinha caído 42%, para 49,1 milhões de euros.",
+"tickers": [
+{
+"s": "PSI",
+"v": -0.42
+},
+{
+"s": "BCP",
+"v": -1.6
+},
+{
+"s": "GALP",
+"v": 0.49
+},
+{
+"s": "EGL",
+"v": -1.37
+}
+],
+"explica": "Na véspera, o BCP tinha subido 2,14% porque a Sonangol admitiu reforçar a sua posição no banco. Quando uma ação sobe muito num dia, é comum alguns investidores venderem no dia seguinte para garantir o ganho.",
+"fonte": {
+"nome": "Jornal de Negócios",
+"url": "https://www.jornaldenegocios.pt/mercados/bolsa/detalhe/pesos-pesados-penalizam-bolsa-de-lisboa-bcp-desvaloriza-1-6"
+}
+},
+{
+"cat": "Energia",
+"humor": "desce",
+"titulo": "Petróleo dispara 3% com ataques a navios e à Arábia Saudita",
+"texto": "O Brent subia 3%, para 112,08 dólares por barril, e o WTI americano 2,73%, para 99,80 dólares. Os Guardas da Revolução iranianos dizem ter atingido quatro navios com petróleo no Golfo Pérsico e que outros três bateram em minas perto do Estreito de Ormuz, e as defesas aéreas sauditas intercetaram um drone dirigido ao campo de Shaybah, da Aramco. Os EUA mandaram sair o pessoal não essencial da embaixada na Arábia Saudita.",
+"tickers": [
+{
+"s": "Brent",
+"v": 3.0
+},
+{
+"s": "WTI",
+"v": 2.73
+}
+],
+"explica": "Petróleo mais caro encarece a gasolina, os transportes e a produção de muitas coisas. Isso alimenta a inflação, o que pode levar os bancos centrais a manter os juros altos durante mais tempo.",
+"fonte": {
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/newsquawk-daily-european-opening-news---22nd-october-2026"
+}
+},
+{
+"cat": "Juros",
+"humor": "desce",
+"titulo": "Juro da dívida francesa passa os 5% pela primeira vez em 24 anos",
+"texto": "O juro das obrigações francesas a 10 anos ultrapassou os 5%, algo que não acontecia há 24 anos, enquanto o alemão estava nos 3,43% e o americano nos 5,09%. Um responsável do BCE, Martins Kazaks, avisou que pode ser preciso subir mais os juros se a inflação continuar acima do objetivo.",
+"tickers": [],
+"explica": "Um juro de 5% quer dizer que França paga 5 euros por ano por cada 100 que pede emprestados a 10 anos. Quanto mais sobe, mais caro fica para o Estado financiar-se e menos dinheiro sobra para outras despesas.",
+"fonte": {
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/newsquawk-daily-european-opening-news---22nd-october-2026"
+}
+},
+{
+"cat": "Ouro",
+"humor": "desce",
+"titulo": "Ouro escorrega para perto dos 4.100 dólares",
+"texto": "O ouro descia 1,02%, para 4.107,51 dólares por onça, e chegou a negociar abaixo dos 4.100. A prata caía 2,74%, para 56,13 dólares, e o cobre 2,21%.",
+"tickers": [
+{
+"s": "Ouro",
+"v": -1.02
+},
+{
+"s": "Prata",
+"v": -2.74
+}
+],
+"explica": "Com o juro das obrigações americanas acima de 5%, guardar dinheiro em ouro, que não paga juros, fica menos atrativo. Por isso o ouro nem sempre sobe quando há tensões no mundo.",
+"fonte": {
+"nome": "Investing.com",
+"url": "https://www.investing.com/news/economy-news/metas-revenue-beat-teslas-lower-annual-sales-goal--whats-moving-markets-4964928"
+}
+},
+{
+"cat": "Cripto",
+"humor": "neutro",
+"titulo": "Bitcoin parada nos 82.800 dólares",
+"texto": "A bitcoin seguia perto dos 82.789 dólares, praticamente igual em 24 horas (+0,1%), e o ether estava nos 2.442 dólares (+0,2%). Se a SpaceX e a Tesla se fundirem, a nova empresa ficaria com cerca de 30.221 bitcoins, mas isso junta moedas que já têm, sem novas compras.",
+"tickers": [
+{
+"s": "BTC",
+"v": 0.1
+},
+{
+"s": "ETH",
+"v": 0.2
+}
+],
+"explica": "Algumas empresas guardam bitcoin como parte das suas reservas. Uma fusão só muda quem é o dono dessas moedas, por isso, sozinha, não traz mais procura nem faz subir o preço.",
+"fonte": {
+"nome": "The Crypto Times",
+"url": "https://www.cryptotimes.io/2026/10/22/crypto-price-today-btc-at-82k-eth-at-2442-xrp-at-1-34-as-markets-weigh-corporate-bitcoin-consolidation/"
+}
+}
+]
+},
 {
 "data": "2026-10-21",
 "atualizado": "21 out, 09:52 (Lisboa)",
@@ -2641,97 +3474,24 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 "palavra": "Negociação fora de horas",
 "definicao": "São as compras e vendas de ações feitas depois do fecho ou antes da abertura da bolsa. Como há pouca gente a negociar, os preços podem mexer muito, sobretudo logo a seguir à divulgação de resultados.",
 "data": "2026-10-21"
+},
+{
+"palavra": "Ações sem direito de voto",
+"definicao": "São ações que te dão uma parte dos lucros da empresa, mas não te deixam votar nas assembleias de acionistas. As empresas usam-nas para angariar dinheiro sem que os fundadores percam o controlo.",
+"data": "2026-10-22"
+},
+{
+"palavra": "Fluxo de caixa livre",
+"definicao": "É o dinheiro que sobra a uma empresa depois de pagar as despesas do dia a dia e os investimentos, como fábricas ou centros de dados. Se for negativo, a empresa está a gastar mais do que o negócio gera e pode ter de pedir dinheiro emprestado.",
+"data": "2026-10-23"
+},
+{
+"palavra": "Perspetiva negativa",
+"definicao": "É um aviso que uma agência de notação dá quando mantém a nota de um país ou de uma empresa, mas admite cortá-la mais à frente. Não muda nada de imediato, mas mostra que a agência está preocupada com as contas.",
+"data": "2026-10-24"
 }
 ],
 "agenda": [
-{
-"data": "2026-10-21",
-"hora": "",
-"titulo": "Resultados de Tesla, Meta, IBM e Lam Research",
-"cat": "Tecnologia",
-"porque": "Depois da pior série de quedas dos chips desde 2008, estas contas dizem se os enormes gastos em inteligência artificial estão a dar retorno.",
-"fonte": {
-"nome": "TipRanks",
-"url": "https://www.tipranks.com/news/major-earnings-this-week-october-19-23-2026"
-}
-},
-{
-"data": "2026-10-21",
-"hora": "",
-"titulo": "Resultados da SAP e da Iberdrola",
-"cat": "Europa",
-"porque": "A SAP é a maior tecnológica europeia e a Iberdrola uma das maiores elétricas: mexem com o Stoxx 600 e com o setor da energia, onde estão a EDP e a EDP Renováveis.",
-"fonte": {
-"nome": "MarketScreener",
-"url": "https://www.marketscreener.com/news/week-s-earnings-calendar-cac-stocks-meta-tesla-sap-and-nestle-in-the-spotlight-ce785cdade80f623"
-}
-},
-{
-"data": "2026-10-22",
-"hora": "13:30",
-"titulo": "Pedidos de subsídio de desemprego nos EUA",
-"cat": "Economia",
-"porque": "Um número baixo mostra que o mercado de trabalho continua forte. Prevê-se cerca de 200 mil pedidos.",
-"fonte": {
-"nome": "Investing.com",
-"url": "https://www.investing.com/news/stock-market-news/us-economic-calendar-preview-key-releases-for-the-week-of-oct-1923-2026-93CH-4958178"
-}
-},
-{
-"data": "2026-10-22",
-"hora": "",
-"titulo": "Resultados da Navigator",
-"cat": "Portugal",
-"porque": "É a primeira empresa do PSI a apresentar as contas do terceiro trimestre, e dá o tom à época de resultados em Lisboa.",
-"fonte": {
-"nome": "DECO Proteste",
-"url": "https://www.deco.proteste.pt/investe/investimentos/acoes/artigos/calendario-resultados-terceiro-trimestre-2026"
-}
-},
-{
-"data": "2026-10-22",
-"hora": "",
-"titulo": "Resultados de Procter & Gamble, Nestlé, L'Oréal e Barclays",
-"cat": "Empresas",
-"porque": "Empresas de bens do dia a dia mostram se as famílias continuam a gastar apesar da inflação. O Barclays mostra como estão os bancos europeus.",
-"fonte": {
-"nome": "MarketScreener",
-"url": "https://www.marketscreener.com/news/week-s-earnings-calendar-cac-stocks-meta-tesla-sap-and-nestle-in-the-spotlight-ce785cdade80f623"
-}
-},
-{
-"data": "2026-10-23",
-"hora": "14:45",
-"titulo": "Índices de atividade (PMI) dos EUA em outubro",
-"cat": "Economia",
-"porque": "Inquéritos às empresas que mostram se a economia está a acelerar ou a travar. Acima de 50 quer dizer crescimento.",
-"fonte": {
-"nome": "Investing.com",
-"url": "https://www.investing.com/news/stock-market-news/us-economic-calendar-preview-key-releases-for-the-week-of-oct-1923-2026-93CH-4958178"
-}
-},
-{
-"data": "2026-10-23",
-"hora": "15:00",
-"titulo": "Expectativas de inflação dos consumidores americanos",
-"cat": "Economia",
-"porque": "Se as famílias esperam preços mais altos, a Fed fica mais preocupada. A última leitura foi de 4,7% a um ano.",
-"fonte": {
-"nome": "Investing.com",
-"url": "https://www.investing.com/news/stock-market-news/us-economic-calendar-preview-key-releases-for-the-week-of-oct-1923-2026-93CH-4958178"
-}
-},
-{
-"data": "2026-10-23",
-"hora": "",
-"titulo": "Moody's revê a nota da dívida de França",
-"cat": "Europa",
-"porque": "Com o prémio de risco francês no máximo desde 2012, um corte da nota pode fazer subir ainda mais os juros que França paga e pesar nas bolsas europeias.",
-"fonte": {
-"nome": "Newsquawk",
-"url": "https://www.newsquawk.com/headlines/newsquawk-daily-european-opening-news---21st-october-2026"
-}
-},
 {
 "data": "2026-10-26",
 "hora": "",
@@ -2755,14 +3515,25 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 }
 },
 {
+"data": "2026-10-27",
+"hora": "",
+"titulo": "Resultados da Coca-Cola, da Visa e do HSBC",
+"cat": "Empresas",
+"porque": "A Coca-Cola mostra como está o consumo (prevê-se um lucro por ação de 0,87 dólares) e a Visa quanto as pessoas estão a gastar com cartões (3,43 dólares por ação). O HSBC é um dos maiores bancos da Europa.",
+"fonte": {
+"nome": "StockTitan",
+"url": "https://www.stocktitan.net/articles/earnings-calendar-week-of-october-26-2026"
+}
+},
+{
 "data": "2026-10-28",
 "hora": "18:00",
 "titulo": "Decisão de juros da Reserva Federal americana",
 "cat": "Juros",
-"porque": "A Fed decide se mantém, sobe ou desce os juros nos EUA. Uma surpresa mexe com todas as bolsas, com o dólar e com o juro das obrigações.",
+"porque": "A Fed decide os juros nos EUA. Espera-se que os mantenha entre 3,75% e 4%: 94 de 100 economistas ouvidos pela Reuters apostam nisso. O mercado vai estar atento a pistas sobre uma subida em dezembro.",
 "fonte": {
-"nome": "Admiral Markets",
-"url": "https://admiralmarkets.com/analytics/traders-blog/ecb-meeting-october-2026"
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/week-in-focus-26-30th-october-2026-fomc-boc-rbnz-ecb-boj-policy-decisions-us-pce"
 }
 },
 {
@@ -2788,14 +3559,36 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 }
 },
 {
+"data": "2026-10-28",
+"hora": "",
+"titulo": "Decisão de juros do Banco do Canadá",
+"cat": "Juros",
+"porque": "O mercado dá cerca de 80% de probabilidade a uma subida de 0,25 pontos. Mostra como outros bancos centrais estão a reagir à inflação causada pelo petróleo caro.",
+"fonte": {
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/week-in-focus-26-30th-october-2026-fomc-boc-rbnz-ecb-boj-policy-decisions-us-pce"
+}
+},
+{
+"data": "2026-10-28",
+"hora": "",
+"titulo": "Resultados da Airbus, da GSK e da Unilever",
+"cat": "Europa",
+"porque": "Três gigantes europeias de setores diferentes (aviões, farmacêutica e consumo) ajudam a perceber como está a economia europeia.",
+"fonte": {
+"nome": "Hargreaves Lansdown",
+"url": "https://www.hl.co.uk/shares/share-research/next-week-on-the-stock-market-26-10-2026"
+}
+},
+{
 "data": "2026-10-29",
 "hora": "12:30",
 "titulo": "PIB dos EUA no 3.º trimestre e inflação PCE",
 "cat": "Economia",
-"porque": "O PIB mostra se a economia americana está a crescer, e a inflação PCE é a medida de preços preferida pela Fed. Saem um dia depois da decisão de juros.",
+"porque": "Prevê-se que a economia americana tenha crescido 3% em ritmo anual e que a inflação PCE, a medida preferida pela Fed, suba de 3,4% para 3,6%. Saem um dia depois da decisão de juros.",
 "fonte": {
-"nome": "NDFX",
-"url": "https://www.ndfxbonus.com/2026/10/october-2026-economic-calendar-us-cpi.html"
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/week-in-focus-26-30th-october-2026-fomc-boc-rbnz-ecb-boj-policy-decisions-us-pce"
 }
 },
 {
@@ -2803,10 +3596,10 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 "hora": "13:15",
 "titulo": "Decisão de juros do Banco Central Europeu",
 "cat": "Juros",
-"porque": "O BCE define os juros da zona euro, que influenciam a Euribor e por isso as prestações da casa em Portugal. A conferência de imprensa começa às 13:45.",
+"porque": "O BCE define os juros da zona euro, que influenciam a Euribor e as prestações da casa em Portugal. Depois de duas subidas este ano, o mercado dá mais de 91% de probabilidade a que fiquem iguais. A conferência de imprensa começa às 13:45.",
 "fonte": {
-"nome": "Admiral Markets",
-"url": "https://admiralmarkets.com/analytics/traders-blog/ecb-meeting-october-2026"
+"nome": "Reuters via Investing.com",
+"url": "https://www.investing.com/news/stock-market-news/stoxx-600-extends-fall-as-kering-slumps-oil-climbs-4968205"
 }
 },
 {
@@ -2821,14 +3614,102 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 }
 },
 {
+"data": "2026-10-29",
+"hora": "",
+"titulo": "Resultados da Intel",
+"cat": "Tecnologia",
+"porque": "A Intel apresenta as contas depois do fecho de Wall Street. Segundo os preços das opções, a ação pode mexer cerca de 8,3% depois dos números.",
+"fonte": {
+"nome": "Investing.com",
+"url": "https://www.investing.com/news/stock-market-news/intel-stock-may-move-83-on-oct-29-earnings-report-93CH-4966674"
+}
+},
+{
+"data": "2026-10-29",
+"hora": "",
+"titulo": "Resultados de Eli Lilly, Mastercard e Merck",
+"cat": "Empresas",
+"porque": "Saem antes da abertura de Wall Street. Prevê-se um lucro por ação de 5,38 dólares na Eli Lilly e de 5,14 na Mastercard.",
+"fonte": {
+"nome": "StockTitan",
+"url": "https://www.stocktitan.net/articles/earnings-calendar-week-of-october-26-2026"
+}
+},
+{
+"data": "2026-10-29",
+"hora": "",
+"titulo": "Resultados da Shell e do Lloyds",
+"cat": "Energia",
+"porque": "Com o petróleo acima dos 110 dólares, as contas da Shell mostram quanto as petrolíferas estão a ganhar com os preços altos.",
+"fonte": {
+"nome": "Hargreaves Lansdown",
+"url": "https://www.hl.co.uk/shares/share-research/next-week-on-the-stock-market-26-10-2026"
+}
+},
+{
+"data": "2026-10-29",
+"hora": "",
+"titulo": "Resultados da TotalEnergies",
+"cat": "Energia",
+"porque": "A petrolífera francesa deverá ter um lucro por ação ajustado de cerca de 3,14 dólares e já anunciou recompras de ações de 2,5 mil milhões de dólares para o último trimestre.",
+"fonte": {
+"nome": "Ad Hoc News",
+"url": "https://www.ad-hoc-news.de/boerse/news/corporate-news/totalenergies-stock-heads-toward-october-29-results-as-buybacks-rise/70235448"
+}
+},
+{
+"data": "2026-10-30",
+"hora": "10:00",
+"titulo": "PIB da zona euro no 3.º trimestre (estimativa rápida)",
+"cat": "Europa",
+"porque": "Mostra se a economia da zona euro está a crescer, numa altura de energia cara e crise política em França. Sai no dia seguinte à decisão do BCE.",
+"fonte": {
+"nome": "Finance Calendar",
+"url": "https://www.financecalendar.com/?p=2107"
+}
+},
+{
 "data": "2026-10-30",
 "hora": "",
 "titulo": "Decisão de juros do Banco do Japão",
 "cat": "Juros",
-"porque": "Segundo a agência Kyodo, o banco central japonês deverá manter os juros em cerca de 1,25%. Uma surpresa mexe com o iene e com as bolsas asiáticas.",
+"porque": "Espera-se que o banco central japonês mantenha os juros em 1,25%, e o mercado dá cerca de 80% de probabilidade a uma subida em dezembro. Uma surpresa mexe com o iene e com as bolsas asiáticas.",
 "fonte": {
 "nome": "Newsquawk",
-"url": "https://www.newsquawk.com/headlines/newsquawk-daily-european-opening-news---21st-october-2026"
+"url": "https://www.newsquawk.com/headlines/week-in-focus-26-30th-october-2026-fomc-boc-rbnz-ecb-boj-policy-decisions-us-pce"
+}
+},
+{
+"data": "2026-10-30",
+"hora": "",
+"titulo": "Resultados da ExxonMobil e da Chevron",
+"cat": "Energia",
+"porque": "As duas maiores petrolíferas americanas apresentam contas antes da abertura. Prevê-se que o lucro por ação mais do que duplique face ao ano passado: 3,96 dólares na Exxon e 4,78 na Chevron.",
+"fonte": {
+"nome": "StockTitan",
+"url": "https://www.stocktitan.net/articles/earnings-calendar-week-of-october-26-2026"
+}
+},
+{
+"data": "2026-10-30",
+"hora": "",
+"titulo": "Resultados da BP e da AstraZeneca",
+"cat": "Europa",
+"porque": "Espera-se que o lucro ajustado da BP mais do que duplique face ao ano passado. A AstraZeneca é uma das maiores farmacêuticas da Europa.",
+"fonte": {
+"nome": "Hargreaves Lansdown",
+"url": "https://www.hl.co.uk/shares/share-research/next-week-on-the-stock-market-26-10-2026"
+}
+},
+{
+"data": "2026-10-30",
+"hora": "",
+"titulo": "Inflação e PIB de França, Alemanha, Espanha e Itália",
+"cat": "Europa",
+"porque": "Primeiras estimativas da inflação de outubro e do crescimento no 3.º trimestre nas maiores economias da zona euro, um dia depois da decisão do BCE.",
+"fonte": {
+"nome": "Newsquawk",
+"url": "https://www.newsquawk.com/headlines/week-in-focus-26-30th-october-2026-fomc-boc-rbnz-ecb-boj-policy-decisions-us-pce"
 }
 },
 {
@@ -2877,6 +3758,17 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 },
 {
 "data": "2026-11-05",
+"hora": "12:00",
+"titulo": "Decisão de juros do Banco de Inglaterra",
+"cat": "Juros",
+"porque": "Com a inflação britânica nos 3,5% em setembro, o mercado inclina-se para uma subida de juros. Uma surpresa mexe com a libra e com as bolsas europeias.",
+"fonte": {
+"nome": "Finance Calendar",
+"url": "https://www.financecalendar.com/?p=1240"
+}
+},
+{
+"data": "2026-11-05",
 "hora": "",
 "titulo": "Resultados da EDP Renováveis",
 "cat": "Portugal",
@@ -2888,10 +3780,21 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 },
 {
 "data": "2026-11-06",
+"hora": "13:30",
+"titulo": "Relatório de emprego dos EUA de outubro",
+"cat": "Economia",
+"porque": "Mostra quantos empregos foram criados nos EUA e qual é a taxa de desemprego. Um mercado de trabalho forte dá margem à Fed para manter os juros altos.",
+"fonte": {
+"nome": "FedRateCalc",
+"url": "https://fedratecalc.com/us-economic-calendar/november-2026/"
+}
+},
+{
+"data": "2026-11-06",
 "hora": "",
 "titulo": "Resultados da EDP",
 "cat": "Portugal",
-"porque": "A EDP é uma das empresas com mais peso no PSI e uma das preferidas pelos dividendos.",
+"porque": "Uma das maiores empresas do PSI apresenta as contas do terceiro trimestre, numa altura de juros altos e energia cara.",
 "fonte": {
 "nome": "DECO Proteste",
 "url": "https://www.deco.proteste.pt/investe/investimentos/acoes/artigos/calendario-resultados-terceiro-trimestre-2026"
