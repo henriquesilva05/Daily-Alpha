@@ -4634,4 +4634,162 @@ document.addEventListener('keydown',function(e){if(menu.hidden)return;if(e.key==
 mark();
 })();
 </script>
+<style>
+/* Novidades: mapa de calor, calculadoras e comparador de ETF */
+.hm{margin-top:8px}
+.hm-g{margin-top:14px}
+.hm-g h3{font-size:15px;font-weight:700;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.hm-g h3 span{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted)}
+.hm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+.hm-t{border-radius:10px;padding:10px 8px;min-height:64px;display:grid;align-content:center;justify-items:center;gap:2px;text-align:center;color:#fff;cursor:default}
+.hm-t b{font-family:var(--f-mono);font-size:13px;font-weight:700;letter-spacing:.02em}
+.hm-t span{font-size:11px;opacity:.9;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm-t em{font-style:normal;font-family:var(--f-mono);font-size:13px;font-weight:700}
+.hm-t.dark{color:#0c1524}
+.hm-leg{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.hm-leg i{display:inline-block;width:150px;height:8px;border-radius:99px;background:linear-gradient(90deg,#b91c1c,#f87171,#cbd5e1,#4ade80,#15803d)}
+.ct-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.ct-res{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-top:14px}
+.ct-res .kpi .v{font-size:19px}
+.ct-note{font-size:13px;color:var(--muted);margin:10px 0 0}
+.ct-note a{color:var(--accent)}
+.ct-sub{font-weight:700;font-size:14.5px;margin:16px 0 0}
+.etf-pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.etf-tbl td,.etf-tbl th{white-space:normal;min-width:130px;text-align:left!important;vertical-align:top}
+.etf-tbl td:first-child,.etf-tbl th:first-child{min-width:110px;color:var(--muted);font-weight:600;font-size:13px}
+@media (max-width:560px){.etf-tbl td,.etf-tbl th{min-width:118px;font-size:13px;padding:8px}}
+.etf-tbl .tk2{font-family:var(--f-mono);font-weight:700}
+.etf-sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+</style>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function fnum(v,d){if(v==null||!isFinite(v))return '—';var neg=v<0;v=Math.abs(v);var s=v.toFixed(d),p=s.split('.'),i=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (neg?'−':'')+i+(p[1]?','+p[1]:'')}
+function eur(v,d){return fnum(v,d==null?2:d)+' €'}
+function pct(v,d){if(v==null||!isFinite(v))return '—';return (v>0?'+':v<0?'−':'')+fnum(Math.abs(v),d==null?2:d)+'%'}
+function num(x){if(x==null)return null;x=String(x).trim().replace(/\s/g,'');if(x==='')return null;if(/,/.test(x))x=x.replace(/\./g,'').replace(',','.');var n=+x;return isFinite(n)?n:null}
+function track(n,p){try{window.daTrack&&window.daTrack(n,p||{})}catch(e){}}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+/* ================= Dados das notícias ================= */
+var NEWSP=(window.__newsP?window.__newsP:Promise.resolve(null)).then(function(d){if(d&&d.dias)return d;try{return JSON.parse(document.getElementById('dados').textContent)}catch(e){return {dias:[]}}},function(){try{return JSON.parse(document.getElementById('dados').textContent)}catch(e){return {dias:[]}}});
+
+/* ================= Mapa de calor ================= */
+function hmColor(v){var a=Math.min(1,Math.abs(v)/3);if(!isFinite(v))return '#94a3b8';
+  function mix(c1,c2,t){return 'rgb('+[0,1,2].map(function(i){return Math.round(c1[i]+(c2[i]-c1[i])*t)}).join(',')+')'}
+  var grey=[148,163,184];return v>=0?mix(grey,[21,128,61],a):mix(grey,[185,28,28],a)}
+function renderHeat(data){var box=$('da-heat');if(!box)return;var sel=document.querySelector('#days [aria-pressed="true"]');var d=sel?sel.getAttribute('data-d'):null;
+  var dias=(data.dias||[]).slice().sort(function(a,b){return a.data<b.data?1:-1});var dia=dias.filter(function(x){return x.data===d})[0]||dias[0];
+  var m=dia&&dia.mapa;if(!m||!m.grupos||!m.grupos.length){box.hidden=true;return}box.hidden=false;
+  var h='<div class="section-head"><h2>Mapa do mercado</h2><small class="time">'+esc(m.ref||'')+'</small></div><p class="ct-note" style="margin-top:-6px">Cada quadrado é uma empresa: verde se subiu, vermelho se desceu. Quanto mais forte a cor, maior o movimento.</p><div class="hm">';
+  m.grupos.forEach(function(g){var it=(g.itens||[]).filter(function(x){return x&&x.s&&isFinite(x.v)}).sort(function(a,b){return b.v-a.v});if(!it.length)return;var up=it.filter(function(x){return x.v>0}).length;
+    h+='<div class="hm-g"><h3>'+esc(g.nome)+'<span>'+up+' a subir · '+(it.length-up)+' a descer ou iguais</span></h3><div class="hm-grid">'+it.map(function(x){var c=hmColor(+x.v),dark=Math.abs(x.v)<0.6;return '<div class="hm-t'+(dark?' dark':'')+'" style="background:'+c+'" title="'+esc((x.n||x.s)+': '+pct(+x.v))+'"><b>'+esc(x.s)+'</b><span>'+esc(x.n||'')+'</span><em>'+pct(+x.v)+'</em></div>'}).join('')+'</div></div>'});
+  h+='</div><div class="hm-leg"><span>−3% ou menos</span><i></i><span>+3% ou mais</span></div>'+(m.fonte&&m.fonte.length?'<p class="ct-note">Fontes: '+m.fonte.map(function(f){return f.url?'<a href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.nome)+'</a>':esc(f.nome)}).join(' · ')+'</p>':'');
+  box.innerHTML=h}
+function initHeat(){var news=$('view-news');if(!news||$('da-heat'))return;var sec=document.createElement('section');sec.id='da-heat';sec.setAttribute('aria-label','Mapa do mercado');sec.hidden=true;
+  var tiles=$('tiles');var anchor=tiles?tiles.closest('section'):null;if(anchor)anchor.parentNode.insertBefore(sec,anchor.nextSibling);else news.appendChild(sec);
+  NEWSP.then(function(data){renderHeat(data);var days=$('days');if(days&&window.MutationObserver){var t=null;new MutationObserver(function(){clearTimeout(t);t=setTimeout(function(){renderHeat(data)},40)}).observe(days,{childList:true,subtree:true,attributes:true,attributeFilter:['aria-pressed']})}})}
+
+/* ================= Calculadoras ================= */
+var calc={tab:'mv'};
+var SRC={eco:'https://eco.sapo.pt/descodificador/como-declarar-e-poupar-em-irs-os-seus-investimentos-financeiros/04-o-que-e-o-englobamento-e-quando-e-que-compensa/',sab:'https://www.sabado.pt/c-studio/detalhe/20260401-110822-como-funciona-a-tributacao-de-mais-valias-e-dividendos-em-portugal',ppr:'https://crncontabilidade.pt/?p=19921',eur:'https://www.euribor-rates.eu/pt/taxas-euribor-actuais/'};
+function kpi(n,v,s,c){return '<div class="kpi"><span class="n">'+n+'</span><span class="v '+(c||'')+'">'+v+'</span>'+(s?'<span class="s">'+s+'</span>':'')+'</div>'}
+function field(id,label,val,extra){return '<label class="f">'+label+'<input class="in" id="'+id+'" type="text" inputmode="decimal" value="'+esc(val)+'"'+(extra||'')+'></label>'}
+function sel(id,label,opts,cur){return '<label class="f">'+label+'<select class="in" id="'+id+'">'+opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(String(o[0])===String(cur)?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select></label>'}
+function v(id){var e=$(id);return e?num(e.value):null}
+function cls(x){return x>0?'t-up':x<0?'t-down':''}
+var MV_RATES=[['0','Até 2 anos (28%)',28],['1','Entre 2 e 5 anos (25,2%)',25.2],['2','Entre 5 e 8 anos (22,4%)',22.4],['3','Mais de 8 anos (19,6%)',19.6]];
+function calcForm(){var t=calc.tab,h='<div class="ct-tabs" role="group" aria-label="Escolher calculadora">'+[['mv','Imposto ao vender'],['dv','Imposto nos dividendos'],['pp','Depósito ou PPR'],['ch','Prestação da casa']].map(function(x){return '<button class="chip" type="button" data-ct="'+x[0]+'" aria-pressed="'+(t===x[0])+'">'+x[1]+'</button>'}).join('')+'</div><form class="form" id="ct-form" autocomplete="off">';
+  if(t==='mv')h+=field('ct-buy','Quanto pagaste (€)','1000')+field('ct-sell','Por quanto vendes (€)','1500')+field('ct-fee','Comissões de compra e venda (€)','10')+sel('ct-hold','Quanto tempo tiveste o investimento',MV_RATES.map(function(r){return [r[0],r[1]]}),'0');
+  if(t==='dv')h+=field('ct-div','Dividendo bruto (€)','100')+sel('ct-orig','De onde vem',[['pt','Empresa portuguesa'],['us','Empresa dos EUA (com o formulário W-8BEN)'],['ot','Outro país']],'pt')+field('ct-wh','Retenção no outro país (%)','15',' disabled');
+  if(t==='pp')h+=field('ct-ini','Montante inicial (€)','1000')+field('ct-mon','Por mês (€)','100')+field('ct-yrs','Durante quantos anos','10')+field('ct-rate','Rendimento anual bruto (%)','3')+sel('ct-age','A tua idade',[['a','Menos de 35 anos'],['b','Entre 35 e 50 anos'],['c','Mais de 50 anos']],'a');
+  if(t==='ch')h+=field('ct-loan','Valor do empréstimo (€)','150000')+field('ct-term','Prazo (anos)','35')+field('ct-eur','Euribor a 6 meses (%)','3,012')+field('ct-spr','Spread do banco (%)','1');
+  h+='<div class="f" style="align-self:end"><button class="btn pri" type="submit">Calcular</button></div></form><div id="ct-out"></div>';return h}
+function runCalc(){var o=$('ct-out');if(!o)return;var t=calc.tab,h='';
+  if(t==='mv'){var b=v('ct-buy'),s=v('ct-sell'),f=v('ct-fee')||0,r=MV_RATES[+$('ct-hold').value][2];if(b==null||s==null||b<0||s<0){o.innerHTML='<p class="ct-note">Indica o valor de compra e de venda.</p>';return}
+    var g=s-b-f,tax=g>0?g*r/100:0;h='<div class="ct-res">'+kpi('Mais-valia (lucro)',eur(g),'depois de descontar as comissões',cls(g))+kpi('Imposto a pagar',eur(tax),'taxa de '+fnum(r,1)+'%')+kpi('Lucro depois do imposto',eur(g-tax),fnum(b?(g-tax)/b*100:0,1)+'% sobre o que pagaste',cls(g))+'</div>'+
+      (g<=0?'<p class="ct-note">Não há imposto sobre perdas. Se tiveres perdas, podes descontá-las em ganhos dos 5 anos seguintes, mas só se escolheres o englobamento na declaração de IRS.</p>':'')+
+      '<p class="ct-note">As taxas reduzidas para quem fica mais tempo com o investimento (25,2%, 22,4% e 19,6%) valem para compras feitas a partir de 29 de junho de 2024; antes disso a taxa é 28%. Também podes escolher o englobamento (somar ao salário e pagar à taxa do teu escalão de IRS), que só costuma compensar a quem ganha pouco. Se o teu rendimento coletável chegar aos 86.696 € e venderes algo que tiveste menos de 365 dias, o englobamento é obrigatório. Fontes: <a href="'+SRC.eco+'" target="_blank" rel="noopener">ECO</a>.</p>'}
+  if(t==='dv'){var d=v('ct-div'),org=$('ct-orig').value,w=org==='pt'?0:org==='us'?15:(v('ct-wh')||0);if(d==null||d<0){o.innerHTML='<p class="ct-note">Indica o valor do dividendo.</p>';return}
+    var fore=d*w/100,ptx=Math.max(0,d*0.28-fore),net=d-fore-ptx;h='<div class="ct-res">'+(w?kpi('Retido no outro país',eur(fore),fnum(w,1)+'%'):'')+kpi('Imposto em Portugal',eur(ptx),w?'o que falta até aos 28%':'retenção de 28%')+kpi('Fica para ti',eur(net),fnum(d?net/d*100:0,1)+'% do dividendo bruto','t-up')+'</div>'+
+      '<p class="ct-note">Em Portugal, os dividendos pagam 28%. Nos dividendos de fora, o país de origem pode reter parte (nos EUA, 15% se tiveres entregado o W-8BEN à corretora) e Portugal cobra a diferença até aos 28%, para não pagares duas vezes. Se o outro país reter mais do que o acordo entre os dois países permite, podes ter de pedir o excesso de volta a esse país. Fonte: <a href="'+SRC.sab+'" target="_blank" rel="noopener">Sábado / XTB</a>.</p>'}
+  if(t==='pp'){var ini=v('ct-ini')||0,mon=v('ct-mon')||0,yrs=Math.max(1,Math.min(40,Math.round(v('ct-yrs')||10))),rate=v('ct-rate')||0,age=$('ct-age').value,cap={a:400,b:350,c:300}[age];
+    var rm=Math.pow(1+rate/100,1/12)-1,rmN=Math.pow(1+rate/100*0.72,1/12)-1,dep=ini,ppr=ini,inv=ini,ded=0;for(var m=1;m<=yrs*12;m++){dep=dep*(1+rmN)+mon;ppr=ppr*(1+rm)+mon;inv+=mon}
+    for(var y=0;y<yrs;y++){ded+=Math.min(cap,((y===0?ini:0)+mon*12)*0.2)}
+    var pprG=ppr-inv,pprN=ppr-Math.max(0,pprG)*0.08;
+    h='<div class="ct-res">'+kpi('Dinheiro que puseste',eur(inv,0),yrs+' anos')+kpi('Depósito, depois de impostos',eur(dep,0),'juros com 28% de imposto',cls(dep-inv))+kpi('PPR, depois de impostos',eur(pprN,0),'8% sobre o ganho no resgate',cls(pprN-inv))+kpi('Bónus no IRS do PPR',eur(ded,0),'20% do que puseste, até '+cap+' € por ano','t-up')+'</div>'+
+      '<p class="ct-note">Exemplo com o mesmo rendimento nos dois, o que na prática raramente acontece: os depósitos têm juro garantido, enquanto o rendimento de muitos PPR varia e pode ser negativo, e os PPR cobram comissões que aqui não entram. O imposto de 8% e a dedução no IRS só valem se resgatares nas condições da lei (por exemplo, reforma ou a partir dos 60 anos, com pelo menos 5 anos de contrato). Fora delas pagas mais imposto e devolves a dedução com uma penalização. A dedução também tem um limite global no IRS. Fontes: <a href="'+SRC.eco+'" target="_blank" rel="noopener">ECO</a> e <a href="'+SRC.ppr+'" target="_blank" rel="noopener">CRN Contabilidade</a>.</p>'}
+  if(t==='ch'){var L=v('ct-loan'),n=Math.round((v('ct-term')||0)*12),eu=v('ct-eur'),sp=v('ct-spr');if(!(L>0)||!(n>0)||eu==null||sp==null){o.innerHTML='<p class="ct-note">Preenche todos os campos.</p>';return}
+    function pay(tan){var i=tan/100/12;return i===0?L/n:L*i/(1-Math.pow(1+i,-n))}var tan=eu+sp,p=pay(tan),tot=p*n-L,pu=pay(tan+1),pd=pay(Math.max(0,tan-1));
+    h='<div class="ct-res">'+kpi('Taxa de juro (TAN)',fnum(tan,3)+'%','Euribor + spread')+kpi('Prestação mensal',eur(p),'sem seguros nem comissões')+kpi('Total de juros',eur(tot,0),'ao longo de '+fnum(n/12,0)+' anos')+kpi('Se a Euribor subir 1 ponto',eur(pu),'mais '+eur(pu-p)+' por mês','t-down')+kpi('Se a Euribor descer 1 ponto',eur(pd),'menos '+eur(p-pd)+' por mês','t-up')+'</div>'+
+      '<p class="ct-note">A Euribor a 6 meses estava nos 3,012% a 23 de outubro de 2026 (<a href="'+SRC.eur+'" target="_blank" rel="noopener">euribor-rates.eu</a>). Num crédito com taxa variável, a prestação é revista quando a Euribor muda (de 6 em 6 meses, se for a Euribor a 6 meses). As contas não incluem seguros, comissões nem imposto do selo, por isso a prestação real é mais alta.</p>'}
+  o.innerHTML=h;track('calculadora',{tipo:t})}
+function renderCalc(){var b=$('da-calc-body');if(!b)return;b.innerHTML=calcForm();var f=$('ct-form');f.addEventListener('submit',function(e){e.preventDefault();runCalc()});var org=$('ct-orig');if(org)org.addEventListener('change',function(){var w=$('ct-wh');w.disabled=org.value!=='ot';if(org.value==='us')w.value='15';if(org.value==='pt')w.value='0'});runCalc()}
+
+/* ================= Comparador de ETF ================= */
+var ETFS=[
+ {k:'VWCE',n:'Vanguard FTSE All-World',isin:'IE00BK5BQT80',idx:'FTSE All-World (ações de todo o mundo, incluindo países emergentes)',ter:0.14,pol:'Acumulação',rep:'Física, por amostragem',hold:'3.759',ini:'2019',px:'VT',pxn:'Vanguard Total World Stock (VT), que segue um índice semelhante',src:'https://www.trackinsight.com/fund/IE00BK5BQT80',srcn:'Trackinsight',c:'#2563eb'},
+ {k:'IWDA',n:'iShares Core MSCI World',isin:'IE00B4L5Y983',idx:'MSCI World (países desenvolvidos)',ter:0.20,pol:'Acumulação',rep:'Física, por amostragem',hold:'1.252',ini:'2009',px:'URTH',pxn:'iShares MSCI World (URTH), que segue o mesmo índice',src:'https://www.trackinsight.com/fund/IE00B4L5Y983',srcn:'Trackinsight',c:'#0b8a4c'},
+ {k:'CSPX',n:'iShares Core S&P 500',isin:'IE00B5BMR087',idx:'S&P 500 (as 500 maiores empresas dos EUA)',ter:0.07,pol:'Acumulação',rep:'Física, completa',hold:'cerca de 500',ini:'',px:'IVV',pxn:'iShares Core S&P 500 (IVV), que segue o mesmo índice',src:'https://app.getquin.com/en/etf/IE00B5BMR087/ishares-core-sp-500-etf',srcn:'getquin',c:'#d63340'},
+ {k:'EQQQ',n:'Invesco EQQQ Nasdaq-100',isin:'IE0032077012',idx:'Nasdaq-100 (as 100 maiores empresas do Nasdaq, sobretudo tecnologia)',ter:0.30,pol:'Distribuição',rep:'Física, completa',hold:'101',ini:'2002',px:'QQQ',pxn:'Invesco QQQ (QQQ), que segue o mesmo índice',src:'https://extraetf.com/ch/etf-profile/IE0032077012',srcn:'extraETF',c:'#7c3aed'},
+ {k:'EIMI',n:'iShares Core MSCI EM IMI',isin:'IE00BKM4GZ66',idx:'MSCI Emerging Markets IMI (países emergentes, como China, Índia e Brasil)',ter:0.18,pol:'Acumulação',rep:'Física, completa',hold:'2.902',ini:'2014',px:'IEMG',pxn:'iShares Core MSCI Emerging Markets (IEMG), que segue o mesmo índice',src:'https://www.trackinsight.com/fund/IE00BKM4GZ66',srcn:'Trackinsight',c:'#946f00'},
+ {k:'SMEA',n:'iShares Core MSCI Europe',isin:'IE00B4K48X80',idx:'MSCI Europe (grandes e médias empresas europeias)',ter:0.12,pol:'Acumulação',rep:'Física, por amostragem',hold:'383',ini:'2009',px:'IEUR',pxn:'iShares Core MSCI Europe (IEUR), que segue um índice semelhante',src:'https://extraetf.com/etf-profile/IE00B4K48X80',srcn:'extraETF',c:'#0891b2'}];
+var etf={pick:['VWCE','IWDA','CSPX'],range:'3A',S:{},busy:false};
+function etfOf(k){return ETFS.filter(function(e){return e.k===k})[0]}
+function parseTD(p){var s=(p&&typeof p==='object'&&!Array.isArray(p)&&'result' in p)?p.result:p;if(typeof s==='string'){var t=s.trim();if(/^[\[{]/.test(t)){try{s=JSON.parse(t)}catch(e){return null}}else if(t.indexOf(';')>0&&t.indexOf('\n')>0){var L=t.split(/\r?\n/),hd=L[0].split(';');s=L.slice(1).filter(Boolean).map(function(l){var c=l.split(';'),o={};hd.forEach(function(k,i){o[k]=c[i]});return o})}else return null}
+  if(s&&!Array.isArray(s)&&Array.isArray(s.values))s=s.values;if(!Array.isArray(s)||!s.length)return null;
+  var r=s.map(function(x){return {d:String(x.datetime||'').slice(0,10),c:+x.close}}).filter(function(x){return x.d&&isFinite(x.c)&&x.c>0}).sort(function(a,b){return a.d<b.d?-1:1});return r.length?r:null}
+var mcpP=null;function mcp(){if(!mcpP){try{mcpP=(window.claude&&window.claude.use)?Promise.resolve(window.claude.use('mcp')).catch(function(){return null}):Promise.resolve(null)}catch(e){mcpP=Promise.resolve(null)}}return mcpP}
+function loadSeries(sym){var key='da1|etfs|'+sym,c=null;try{c=JSON.parse(lsGet(key)||'null')}catch(e){}if(c&&Date.now()-c.t<12*36e5&&c.v)return Promise.resolve(c.v);
+  return mcp().then(function(m){if(!m)return null;return m.callTool('Twelve Data','get_time_series',{symbol:sym,interval:'1day',outputsize:1350}).then(function(res){var p=res&&res.payload!==undefined?res.payload:(res&&res.content&&res.content[0]&&res.content[0].text);var r=parseTD(p);if(r)lsSet(key,JSON.stringify({t:Date.now(),v:r}));return r},function(){return null})})}
+function retOver(S,days){var n=S.length;if(n<2)return null;var last=S[n-1],tgt=new Date(Date.parse(last.d)-days*864e5).toISOString().slice(0,10);if(S[0].d>tgt)return null;var lo=0,hi=n-1,r=0;while(lo<=hi){var mid=(lo+hi)>>1;if(S[mid].d<=tgt){r=mid;lo=mid+1}else hi=mid-1}return (last.c/S[r].c-1)*100}
+function etfTable(){var P=etf.pick.map(etfOf);function row(lab,f){return '<tr><td>'+lab+'</td>'+P.map(function(e){return '<td>'+f(e)+'</td>'}).join('')+'</tr>'}
+  var minTer=Math.min.apply(null,P.map(function(e){return e.ter}));
+  return '<div class="tbl-wrap"><table class="tbl etf-tbl"><thead><tr><th></th>'+P.map(function(e){return '<th style="text-align:left"><span class="etf-sw" style="background:'+e.c+'"></span><span class="tk2">'+esc(e.k)+'</span></th>'}).join('')+'</tr></thead><tbody>'+
+   row('Nome',function(e){return esc(e.n)})+row('O que tem lá dentro',function(e){return esc(e.idx)})+row('Custos anuais (TER)',function(e){return '<b'+(e.ter===minTer?' class="t-up"':'')+'>'+fnum(e.ter,2)+'%</b><div class="sub">'+fnum(e.ter*10,1)+' € por ano em cada 1.000 €</div>'})+
+   row('Dividendos',function(e){return esc(e.pol)+'<div class="sub">'+(e.pol==='Acumulação'?'reinveste os dividendos':'paga os dividendos em dinheiro')+'</div>'})+row('Número de empresas',function(e){return esc(e.hold)})+row('Como copia o índice',function(e){return esc(e.rep)})+row('Desde',function(e){return esc(e.ini||'—')})+row('ISIN',function(e){return '<span class="mono" style="font-size:12.5px">'+esc(e.isin)+'</span>'})+
+   row('Fonte',function(e){return '<a href="'+esc(e.src)+'" target="_blank" rel="noopener">'+esc(e.srcn)+'</a>'})+'</tbody></table></div>'}
+var RD={'1A':365,'3A':1096,'5A':1827};
+function etfChart(){var el=$('etf-chart'),pf=$('etf-perf');if(!el)return;var P=etf.pick.map(etfOf),days=RD[etf.range];
+  if(etf.busy){el.innerHTML='<p class="skel">A carregar o histórico de preços…</p>';return}
+  var got=P.filter(function(e){return etf.S[e.px]});if(!got.length){el.innerHTML='<p class="note">'+(etf.noData?'O desempenho histórico precisa dos dados de mercado (conector Twelve Data), que não estão disponíveis nesta vista. Os custos e a composição acima continuam válidos.':'')+'</p>';if(pf)pf.innerHTML='';return}
+  var from=new Date(Date.now()-days*864e5).toISOString().slice(0,10);var series=got.map(function(e){var S=etf.S[e.px].filter(function(x){return x.d>=from});var b=S.length?S[0].c:1;return {e:e,pts:S.map(function(x){return {d:x.d,v:1000*x.c/b}})}}).filter(function(s){return s.pts.length>5});
+  if(!series.length){el.innerHTML='';return}
+  var W=Math.max(280,el.clientWidth||600),H=240,pl=6,pr=58,pt=10,pb=24,iw=W-pl-pr,ih=H-pt-pb;var t0=Date.parse(from),t1=Date.now();var mn=Infinity,mx=-Infinity;series.forEach(function(s){s.pts.forEach(function(p){if(p.v<mn)mn=p.v;if(p.v>mx)mx=p.v})});var pad=(mx-mn)*0.06||10;mn-=pad;mx+=pad;
+  function X(d){return pl+(Date.parse(d)-t0)/(t1-t0)*iw}function Y(v){return pt+(1-(v-mn)/(mx-mn))*ih}
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Quanto valeriam 1.000 investidos">';var step=(mx-mn)/4;for(var i=0;i<=4;i++){var gv=mn+step*i,y=Y(gv).toFixed(1);svg+='<line x1="'+pl+'" x2="'+(pl+iw)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/><text class="ax" x="'+(W-4)+'" y="'+(+y+4)+'" text-anchor="end">'+fnum(gv,0)+'</text>'}
+  [0,0.5,1].forEach(function(f,i){var d=new Date(t0+(t1-t0)*f).toISOString().slice(0,10),p=d.split('-');svg+='<text class="ax" x="'+(pl+iw*f).toFixed(1)+'" y="'+(H-6)+'" text-anchor="'+(i===0?'start':i===2?'end':'middle')+'">'+['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][+p[1]-1]+' '+p[0].slice(2)+'</text>'});
+  var by=Y(1000).toFixed(1);svg+='<line x1="'+pl+'" x2="'+(pl+iw)+'" y1="'+by+'" y2="'+by+'" stroke="var(--muted)" stroke-dasharray="4 4" opacity=".6"/>';
+  series.forEach(function(s){svg+='<path d="'+s.pts.map(function(p,i){return (i?'L':'M')+X(p.d).toFixed(1)+','+Y(p.v).toFixed(1)}).join('')+'" fill="none" stroke="'+s.e.c+'" stroke-width="2" stroke-linejoin="round"/>'});
+  svg+='</svg>';el.innerHTML=svg;
+  if(pf)pf.innerHTML='<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ETF</th><th>1 ano</th><th>3 anos</th><th>5 anos</th><th>1.000 há '+etf.range.replace('A',' ano').replace(/^(\d+) ano$/,function(m,a){return a==='1'?'1 ano':a+' anos'})+'</th></tr></thead><tbody>'+got.map(function(e){var S=etf.S[e.px],r1=retOver(S,365),r3=retOver(S,1096),r5=retOver(S,1827),rr=retOver(S,days);return '<tr><td><span class="etf-sw" style="background:'+e.c+'"></span><b>'+esc(e.k)+'</b> <span class="sub">via '+esc(e.px)+'</span></td><td class="'+cls(r1)+'">'+pct(r1,1)+'</td><td class="'+cls(r3)+'">'+pct(r3,1)+'</td><td class="'+cls(r5)+'">'+pct(r5,1)+'</td><td>'+(rr==null?'—':fnum(1000*(1+rr/100),0))+'</td></tr>'}).join('')+'</tbody></table></div>'}
+function loadEtf(){var need=etf.pick.map(etfOf).map(function(e){return e.px}).filter(function(s){return !etf.S[s]});if(!need.length){etfChart();return}etf.busy=true;etfChart();
+  var chain=Promise.resolve();need.forEach(function(s){chain=chain.then(function(){return loadSeries(s).then(function(r){if(r)etf.S[s]=r})})});
+  chain.then(function(){etf.busy=false;etf.noData=!etf.pick.some(function(k){return etf.S[etfOf(k).px]});etfChart()})}
+function renderEtf(){var b=$('da-etf-body');if(!b)return;
+  b.innerHTML='<p class="note">Escolhe até 3 ETF populares entre os investidores europeus e compara os custos, o que têm lá dentro e como se portaram.</p><div class="etf-pick" role="group" aria-label="Escolher ETF">'+ETFS.map(function(e){return '<button class="chip" type="button" data-etf="'+e.k+'" aria-pressed="'+(etf.pick.indexOf(e.k)>=0)+'">'+e.k+'</button>'}).join('')+'</div><div style="margin-top:14px">'+etfTable()+'</div>'+
+   '<div class="ch-head" style="margin-top:18px"><h3>Quanto valeriam 1.000 investidos</h3>'+'<div class="filters">'+['1A','3A','5A'].map(function(r){return '<button class="chip" type="button" data-etfr="'+r+'" aria-pressed="'+(r===etf.range)+'">'+r.replace('A',r==='1A'?' ano':' anos')+'</button>'}).join('')+'</div></div><div class="chart" id="etf-chart"></div><div id="etf-perf"></div>'+
+   '<p class="ct-note">O desempenho é o do ETF americano equivalente, em dólares, com dividendos fora da conta: '+etf.pick.map(etfOf).map(function(e){return esc(e.k)+' → '+esc(e.pxn)}).join('; ')+'. Os ETF europeus (UCITS) seguem os mesmos índices mas podem ter resultados ligeiramente diferentes, por causa dos custos, do câmbio euro/dólar e dos impostos sobre dividendos. Em Portugal, como na restante União Europeia, os investidores particulares normalmente só podem comprar os ETF UCITS. Desempenho passado não garante resultados futuros, e isto não é uma recomendação de investimento.</p>';
+  loadEtf()}
+
+/* ================= Montagem ================= */
+function initLearn(){var ap=$('view-ap');if(!ap||$('da-calc'))return;var stack=ap.querySelector('.stack');if(!stack)return;var sim=$('ap-sim');
+  var c=document.createElement('section');c.className='card';c.id='da-calc';c.innerHTML='<h3>Calculadoras</h3><p class="note">Faz as contas aos impostos sobre os teus investimentos, compara um depósito com um PPR e simula a prestação da casa.</p><div id="da-calc-body"></div>';
+  var e=document.createElement('section');e.className='card';e.id='da-etf';e.innerHTML='<h3>Comparador de ETF</h3><div id="da-etf-body"></div>';
+  if(sim&&sim.nextSibling){stack.insertBefore(c,sim.nextSibling);stack.insertBefore(e,c.nextSibling)}else{stack.appendChild(c);stack.appendChild(e)}
+  var done=false;function go(){if(done)return;done=true;renderCalc();renderEtf()}
+  if(!ap.hidden)go();new MutationObserver(function(){if(!ap.hidden)go()}).observe(ap,{attributes:true,attributeFilter:['hidden']})}
+document.addEventListener('click',function(ev){var el;
+  if((el=ev.target.closest('[data-ct]'))){calc.tab=el.getAttribute('data-ct');renderCalc();return}
+  if((el=ev.target.closest('[data-etf]'))){var k=el.getAttribute('data-etf'),i=etf.pick.indexOf(k);if(i>=0){if(etf.pick.length>1)etf.pick.splice(i,1)}else{if(etf.pick.length>=3)etf.pick.shift();etf.pick.push(k)}track('comparador_etf',{etf:etf.pick.join(',')});renderEtf();return}
+  if((el=ev.target.closest('[data-etfr]'))){etf.range=el.getAttribute('data-etfr');document.querySelectorAll('[data-etfr]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el))});etfChart();return}
+});
+function init(){initHeat();initLearn()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
 </body></html>
