@@ -535,11 +535,19 @@ window.DA_CONFIG={supabaseUrl:'https://mdxcvflzskqetvtprhew.supabase.co',supabas
 window.DA_ANALYTICS={clarityId:'z2qqm1ps1g',posthogKey:'phc_pPBkjex6jEQVFkYCtWsxKmvsePCnfm2PFQqun2iyMbEy',posthogHost:'https://eu.i.posthog.com'};
 (function(){
   var C=window.DA_ANALYTICS;
+  /* Só carrega o Clarity e o PostHog depois de o leitor aceitar (RGPD). */
+  var CK='da-consent';function getC(){try{return localStorage.getItem(CK)}catch(e){return null}}
+  function loadTrackers(){if(window.__daTrk)return;window.__daTrk=true;
   if(C.clarityId){(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,'clarity','script',C.clarityId)}
   if(C.posthogKey){
     !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister identify alias set_config reset opt_in_capturing opt_out_capturing has_opted_out_capturing get_distinct_id people.set people.set_once".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
     posthog.init(C.posthogKey,{api_host:C.posthogHost,person_profiles:'identified_only',autocapture:true,capture_pageview:true,capture_pageleave:true});
   }
+    try{if(window.clarity&&C.clarityId)clarity('consent')}catch(e){}
+    try{var sb0=window.__sb;if(sb0)sb0.auth.getSession().then(function(r){var s=r&&r.data&&r.data.session;if(s)ident(s.user)}).catch(function(){})}catch(e){}
+  }
+  window.daConsent={get:getC,set:function(v){var old=getC();try{localStorage.setItem(CK,v)}catch(e){}if(v==='sim')loadTrackers();else if(old==='sim'){try{window.posthog&&window.posthog.opt_out_capturing&&window.posthog.opt_out_capturing()}catch(e){}location.reload()}}};
+  if(getC()==='sim')loadTrackers();
   function track(name,props){try{if(window.posthog&&C.posthogKey)posthog.capture(name,props||{})}catch(e){}try{if(window.clarity&&C.clarityId)clarity('event',name)}catch(e){}try{window.va&&window.va('event',{name:name,data:props||{}})}catch(e){}}
   window.daTrack=track;
   /* Liga a visita à conta, quando há sessão iniciada (só o id interno e o email). */
@@ -4687,7 +4695,7 @@ function renderHeat(data){var box=$('da-heat');if(!box)return;var sel=document.q
   var h='<div class="section-head"><h2>Mapa do mercado</h2><small class="time">'+esc(m.ref||'')+'</small></div><p class="ct-note" style="margin-top:-6px">Cada quadrado é uma empresa: verde se subiu, vermelho se desceu. Quanto mais forte a cor, maior o movimento.</p><div class="hm">';
   m.grupos.forEach(function(g){var it=(g.itens||[]).filter(function(x){return x&&x.s&&isFinite(x.v)}).sort(function(a,b){return b.v-a.v});if(!it.length)return;var up=it.filter(function(x){return x.v>0}).length;
     h+='<div class="hm-g"><h3>'+esc(g.nome)+'<span>'+up+' a subir · '+(it.length-up)+' a descer ou iguais</span></h3><div class="hm-grid">'+it.map(function(x){var c=hmColor(+x.v),dark=Math.abs(x.v)<0.6;return '<div class="hm-t'+(dark?' dark':'')+'" style="background:'+c+'" title="'+esc((x.n||x.s)+': '+pct(+x.v))+'"><b>'+esc(x.s)+'</b><span>'+esc(x.n||'')+'</span><em>'+pct(+x.v)+'</em></div>'}).join('')+'</div></div>'});
-  h+='</div><div class="hm-leg"><span>−3% ou menos</span><i></i><span>+3% ou mais</span></div>'+(m.fonte&&m.fonte.length?'<p class="ct-note">Fontes: '+m.fonte.map(function(f){return f.url?'<a href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.nome)+'</a>':esc(f.nome)}).join(' · ')+'</p>':'');
+  h+='</div><div class="hm-leg"><span>−3% ou menos</span><i></i><span>+3% ou mais</span></div>'+(m.fonte&&m.fonte.length?'<p class="ct-note">Fontes: '+m.fonte.map(function(f){if(/twelve ?data/i.test(f.nome||''))return '<a href="https://twelvedata.com" target="_blank" rel="noopener">Data provided by Twelve Data</a>';return f.url?'<a href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.nome)+'</a>':esc(f.nome)}).join(' · ')+'</p>':'');
   box.innerHTML=h}
 function initHeat(){var news=$('view-news');if(!news||$('da-heat'))return;var sec=document.createElement('section');sec.id='da-heat';sec.setAttribute('aria-label','Mapa do mercado');sec.hidden=true;
   var tiles=$('tiles');var anchor=tiles?tiles.closest('section'):null;if(anchor)anchor.parentNode.insertBefore(sec,anchor.nextSibling);else news.appendChild(sec);
@@ -4772,7 +4780,7 @@ function loadEtf(){var need=etf.pick.map(etfOf).map(function(e){return e.px}).fi
 function renderEtf(){var b=$('da-etf-body');if(!b)return;
   b.innerHTML='<p class="note">Escolhe até 3 ETF populares entre os investidores europeus e compara os custos, o que têm lá dentro e como se portaram.</p><div class="etf-pick" role="group" aria-label="Escolher ETF">'+ETFS.map(function(e){return '<button class="chip" type="button" data-etf="'+e.k+'" aria-pressed="'+(etf.pick.indexOf(e.k)>=0)+'">'+e.k+'</button>'}).join('')+'</div><div style="margin-top:14px">'+etfTable()+'</div>'+
    '<div class="ch-head" style="margin-top:18px"><h3>Quanto valeriam 1.000 investidos</h3>'+'<div class="filters">'+['1A','3A','5A'].map(function(r){return '<button class="chip" type="button" data-etfr="'+r+'" aria-pressed="'+(r===etf.range)+'">'+r.replace('A',r==='1A'?' ano':' anos')+'</button>'}).join('')+'</div></div><div class="chart" id="etf-chart"></div><div id="etf-perf"></div>'+
-   '<p class="ct-note">O desempenho é o do ETF americano equivalente, em dólares, com dividendos fora da conta: '+etf.pick.map(etfOf).map(function(e){return esc(e.k)+' → '+esc(e.pxn)}).join('; ')+'. Os ETF europeus (UCITS) seguem os mesmos índices mas podem ter resultados ligeiramente diferentes, por causa dos custos, do câmbio euro/dólar e dos impostos sobre dividendos. Em Portugal, como na restante União Europeia, os investidores particulares normalmente só podem comprar os ETF UCITS. Desempenho passado não garante resultados futuros, e isto não é uma recomendação de investimento.</p>';
+   '<p class="ct-note">O desempenho é o do ETF americano equivalente, em dólares, com dividendos fora da conta: '+etf.pick.map(etfOf).map(function(e){return esc(e.k)+' → '+esc(e.pxn)}).join('; ')+'. Os ETF europeus (UCITS) seguem os mesmos índices mas podem ter resultados ligeiramente diferentes, por causa dos custos, do câmbio euro/dólar e dos impostos sobre dividendos. Em Portugal, como na restante União Europeia, os investidores particulares normalmente só podem comprar os ETF UCITS. Desempenho passado não garante resultados futuros, e isto não é uma recomendação de investimento. <a href=\"https://twelvedata.com\" target=\"_blank\" rel=\"noopener\">Data provided by Twelve Data</a>.</p>';
   loadEtf()}
 
 /* ================= Montagem ================= */
@@ -4787,7 +4795,53 @@ document.addEventListener('click',function(ev){var el;
   if((el=ev.target.closest('[data-etf]'))){var k=el.getAttribute('data-etf'),i=etf.pick.indexOf(k);if(i>=0){if(etf.pick.length>1)etf.pick.splice(i,1)}else{if(etf.pick.length>=3)etf.pick.shift();etf.pick.push(k)}track('comparador_etf',{etf:etf.pick.join(',')});renderEtf();return}
   if((el=ev.target.closest('[data-etfr]'))){etf.range=el.getAttribute('data-etfr');document.querySelectorAll('[data-etfr]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el))});etfChart();return}
 });
-function init(){initHeat();initLearn()}
+function attrib(){['#view-pf > p.note','#view-sr > p.note','#ap-sim'].forEach(function(q){var el=document.querySelector(q);if(!el||el.querySelector('.td-attr'))return;var s=document.createElement('span');s.className='td-attr';s.innerHTML=(q==='#ap-sim'?'<span class="sub" style="display:block;margin-top:10px">':' ')+'<a href=\"https://twelvedata.com\" target=\"_blank\" rel=\"noopener\">Data provided by Twelve Data</a>'+(q==='#ap-sim'?'</span>':'.');el.appendChild(s)})}
+function init(){initHeat();initLearn();attrib()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+<style>
+/* Aviso de cookies e privacidade */
+.ck-bar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);transform:translateX(-50%);z-index:60;width:min(720px,calc(100% - 24px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg,0 20px 50px rgba(0,0,0,.25));padding:16px 18px;display:grid;gap:12px}
+.ck-bar p{margin:0;font-size:14px;line-height:1.5}
+.ck-bar .row{justify-content:flex-end}
+.ck-bar .lnk,.ck-foot{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px}
+.ck-dlg{position:fixed;inset:0;z-index:70;background:var(--scrim,rgba(6,10,18,.72));display:grid;place-items:center;padding:16px}
+.ck-box{background:var(--surface);color:var(--ink);border-radius:20px;max-width:640px;width:100%;max-height:min(86vh,760px);overflow:auto;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.ck-box h2{font-size:22px;font-weight:800;margin:0 0 8px}
+.ck-box h3{font-size:15px;font-weight:700;margin:16px 0 4px}
+.ck-box p,.ck-box li{font-size:14px;color:var(--muted);line-height:1.55;margin:0 0 6px}
+.ck-box ul{margin:0;padding-left:20px}
+.ck-state{font-size:13px;font-weight:700;margin-top:14px}
+</style>
+<script>
+(function(){
+'use strict';
+/* Contacto para pedidos sobre dados pessoais (preencher com o email do responsável pelo site). */
+var CONTACTO='';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function C(){return window.daConsent||{get:function(){return null},set:function(){}}}
+function hideBar(){var b=document.getElementById('ck-bar');if(b)b.remove()}
+function choose(v){C().set(v);hideBar();closeDlg()}
+function bar(){if(document.getElementById('ck-bar'))return;var d=document.createElement('div');d.className='ck-bar';d.id='ck-bar';d.setAttribute('role','region');d.setAttribute('aria-label','Cookies e privacidade');
+  d.innerHTML='<p><b>Cookies e estatísticas.</b> Gostávamos de usar o PostHog e o Microsoft Clarity para perceber como usas o Daily Alpha e melhorá-lo (páginas vistas, cliques e gravações das visitas). Só os ativamos se aceitares. <button class="lnk" type="button" data-ck="info">Saber mais</button></p><div class="row"><button class="btn" type="button" data-ck="nao">Recusar</button><button class="btn pri" type="button" data-ck="sim">Aceitar</button></div>';
+  document.body.appendChild(d)}
+function closeDlg(){var x=document.getElementById('ck-dlg');if(x)x.remove()}
+function dlg(){closeDlg();var st=C().get();var w=document.createElement('div');w.className='ck-dlg';w.id='ck-dlg';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');w.setAttribute('aria-label','Privacidade e cookies');
+  w.innerHTML='<div class="ck-box"><h2>Privacidade e cookies</h2>'+
+  '<p>O Daily Alpha é um projeto pessoal e educativo. Aqui explicamos que dados são guardados e para quê.</p>'+
+  '<h3>Sempre ativos (necessários)</h3><ul><li><b>Preferências no teu navegador:</b> o tema, as notícias que marcaste como lidas e a tua escolha sobre cookies ficam guardados só no teu navegador.</li><li><b>Conta (se criares uma):</b> o teu email, o nome que indicares e o teu portfólio ficam guardados no Supabase, para poderes entrar noutro aparelho. Só tu vês o teu portfólio.</li><li><b>Contagem de visitas da Vercel:</b> conta as páginas vistas de forma agregada e sem cookies.</li></ul>'+
+  '<h3>Só com a tua autorização</h3><ul><li><b>PostHog</b> (servidores na União Europeia): páginas vistas, cliques e funcionalidades usadas. Se tiveres sessão iniciada, liga essa utilização à tua conta (ao identificador interno e ao email).</li><li><b>Microsoft Clarity:</b> mapas de calor e gravações das visitas, para vermos onde as pessoas se perdem no site.</li></ul>'+
+  '<h3>Os teus direitos</h3><p>Podes mudar de ideias a qualquer momento nesta janela. Podes apagar o teu portfólio na tua conta e pedir para ver, corrigir ou apagar os teus dados'+(CONTACTO?' através de <a href="mailto:'+esc(CONTACTO)+'">'+esc(CONTACTO)+'</a>':' ao responsável pelo site')+'. Também podes apresentar queixa à CNPD (Comissão Nacional de Proteção de Dados).</p>'+
+  '<p class="ck-state">Escolha atual: '+(st==='sim'?'estatísticas aceites':st==='nao'?'estatísticas recusadas':'ainda não escolheste')+'</p>'+
+  '<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" type="button" data-ck="fechar">Fechar</button><button class="btn" type="button" data-ck="nao">Recusar</button><button class="btn pri" type="button" data-ck="sim">Aceitar</button></div></div>';
+  document.body.appendChild(w);var b=w.querySelector('[data-ck="sim"]');if(b)b.focus()}
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-ck]');if(el){var a=el.getAttribute('data-ck');if(a==='sim'||a==='nao')choose(a);else if(a==='info')dlg();else if(a==='fechar')closeDlg();return}
+  if(e.target&&e.target.id==='ck-dlg')closeDlg()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDlg()});
+function init(){var v=C().get();if(v!=='sim'&&v!=='nao')bar();
+  document.querySelectorAll('footer').forEach(function(f){if(f.querySelector('.ck-foot'))return;var b=document.createElement('button');b.type='button';b.className='ck-foot';b.setAttribute('data-ck','info');b.textContent='Privacidade e cookies';f.appendChild(document.createTextNode(' '));f.appendChild(b)})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
