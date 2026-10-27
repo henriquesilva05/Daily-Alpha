@@ -4645,6 +4645,7 @@ mark();
 <style>
 /* Novidades: mapa de calor, calculadoras e comparador de ETF */
 .hm{margin-top:8px}
+.hm-ref{font-family:var(--f-display);font-size:12.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:4px 11px}
 .hm-g{margin-top:14px}
 .hm-g h3{font-size:15px;font-weight:700;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .hm-g h3 span{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted)}
@@ -4689,10 +4690,15 @@ var NEWSP=(window.__newsP?window.__newsP:Promise.resolve(null)).then(function(d)
 function hmColor(v){var a=Math.min(1,Math.abs(v)/3);if(!isFinite(v))return '#94a3b8';
   function mix(c1,c2,t){return 'rgb('+[0,1,2].map(function(i){return Math.round(c1[i]+(c2[i]-c1[i])*t)}).join(',')+')'}
   var grey=[148,163,184];return v>=0?mix(grey,[21,128,61],a):mix(grey,[185,28,28],a)}
+function refLabel(m){var WD=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'],MS=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var s=String(m.sessao||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return String(m.ref||'').replace(/^Última sessão:\s*/i,'Fecho de ');
+  var p=s.split('-'),dt=new Date(Date.UTC(+p[0],+p[1]-1,+p[2])),txt=WD[dt.getUTCDay()]+', '+(+p[2])+' '+MS[+p[1]-1];
+  var n=new Date(),t=Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()),diff=Math.round((t-dt.getTime())/864e5);
+  return diff===0?'Fecho de hoje · '+txt:diff===1?'Fecho de ontem · '+txt:'Fecho de '+txt}
 function renderHeat(data){var box=$('da-heat');if(!box)return;var sel=document.querySelector('#days [aria-pressed="true"]');var d=sel?sel.getAttribute('data-d'):null;
   var dias=(data.dias||[]).slice().sort(function(a,b){return a.data<b.data?1:-1});var dia=dias.filter(function(x){return x.data===d})[0]||dias[0];
   var m=dia&&dia.mapa;if(!m||!m.grupos||!m.grupos.length){box.hidden=true;return}box.hidden=false;
-  var h='<div class="section-head"><h2>Mapa do mercado</h2><small class="time">'+esc(m.ref||'')+'</small></div><p class="ct-note" style="margin-top:-6px">Cada quadrado é uma empresa: verde se subiu, vermelho se desceu. Quanto mais forte a cor, maior o movimento.</p><div class="hm">';
+  var h='<div class="section-head"><h2>Mapa do mercado</h2><span class="hm-ref">'+esc(refLabel(m))+'</span></div><p class="ct-note" style="margin-top:-6px">Cada quadrado é uma empresa: verde se subiu, vermelho se desceu. Quanto mais forte a cor, maior o movimento.</p><div class="hm">';
   m.grupos.forEach(function(g){var it=(g.itens||[]).filter(function(x){return x&&x.s&&isFinite(x.v)}).sort(function(a,b){return b.v-a.v});if(!it.length)return;var up=it.filter(function(x){return x.v>0}).length;
     h+='<div class="hm-g"><h3>'+esc(g.nome)+'<span>'+up+' a subir · '+(it.length-up)+' a descer ou iguais</span></h3><div class="hm-grid">'+it.map(function(x){var c=hmColor(+x.v),dark=Math.abs(x.v)<0.6;return '<div class="hm-t'+(dark?' dark':'')+'" style="background:'+c+'" title="'+esc((x.n||x.s)+': '+pct(+x.v))+'"><b>'+esc(x.s)+'</b><span>'+esc(x.n||'')+'</span><em>'+pct(+x.v)+'</em></div>'}).join('')+'</div></div>'});
   h+='</div><div class="hm-leg"><span>−3% ou menos</span><i></i><span>+3% ou mais</span></div>'+(m.fonte&&m.fonte.length?'<p class="ct-note">Fontes: '+m.fonte.map(function(f){if(/twelve ?data/i.test(f.nome||''))return '<a href="https://twelvedata.com" target="_blank" rel="noopener">Data provided by Twelve Data</a>';return f.url?'<a href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.nome)+'</a>':esc(f.nome)}).join(' · ')+'</p>':'');
