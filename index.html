@@ -5975,4 +5975,42 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 }</script>
 
+<style>
+/* Ligações para o Yahoo Finance nos quadrados do mapa do mercado e dos números do dia */
+.hm-t.da-link,.tile.da-link{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+.hm-t.da-link:hover,.hm-t.da-link:focus-visible{transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 8px 18px -8px rgba(12,21,36,.45)}
+.tile.da-link:hover,.tile.da-link:focus-visible{transform:translateY(-2px);border-color:var(--accent);box-shadow:var(--shadow-lg,var(--shadow))}
+.hm-t.da-link:focus-visible,.tile.da-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.hm-t.da-link,.tile.da-link{transition:none}.hm-t.da-link:hover,.tile.da-link:hover{transform:none}}
+</style>
+<script>
+(function(){
+'use strict';
+var EN=window.DA_LANG==='en';
+/* Índices e mercados dos números do dia -> símbolo do Yahoo Finance */
+var MK=[[/futur.*s&p|s&p.*futur/i,'ES=F'],[/futur.*nasdaq|nasdaq.*futur/i,'NQ=F'],[/futur.*dow|dow.*futur/i,'YM=F'],
+  [/^s&p ?500/i,'^GSPC'],[/^nasdaq/i,'^IXIC'],[/^dow/i,'^DJI'],[/stoxx ?600/i,'^STOXX'],[/^psi/i,'PSI20.LS'],
+  [/brent/i,'BZ=F'],[/^(ouro|gold)/i,'GC=F'],[/^bitcoin|^btc/i,'BTC-USD'],[/eur ?\/ ?usd|euro ?\/ ?d/i,'EURUSD=X'],
+  [/juro 10|10.?year|10 anos/i,'^TNX'],[/ether/i,'ETH-USD'],[/^dax/i,'^GDAXI'],[/^cac/i,'^FCHI'],[/^ibex/i,'^IBEX'],[/ftse ?100/i,'^FTSE']];
+function urlFor(sym){return 'https://finance.yahoo.com/quote/'+encodeURIComponent(sym)+'/'}
+function tileSym(name){name=String(name||'').replace(/\s*\((semana|week|sexta|friday|\d+ (dias|days))\)\s*/ig,' ').trim();
+  for(var i=0;i<MK.length;i++)if(MK[i][0].test(name))return MK[i][1];return null}
+function heatSym(el){var b=el.querySelector('b');if(!b)return null;var s=b.textContent.trim().toUpperCase();if(!/^[A-Z0-9.\-]{1,10}$/.test(s))return null;
+  var g=el.closest('.hm-g'),h=g&&g.querySelector('h3');var grp=h?h.textContent:'';
+  if(/^\s*PSI/i.test(grp))return s+'.LS';return s.replace('.','-')}
+function mark(el,sym,label){if(el.getAttribute('data-yf')===sym)return;el.setAttribute('data-yf',sym);el.classList.add('da-link');el.setAttribute('role','link');el.setAttribute('tabindex','0');
+  var t=(EN?'Open ':'Abrir ')+label+(EN?' on Yahoo Finance':' no Yahoo Finance');el.setAttribute('title',t);el.setAttribute('aria-label',t)}
+function scan(){
+  document.querySelectorAll('#da-heat .hm-t').forEach(function(el){var s=heatSym(el);if(!s)return;var n=el.querySelector('span');mark(el,s,(n&&n.textContent.trim())||s)});
+  document.querySelectorAll('#tiles .tile').forEach(function(el){var n=el.querySelector('.n');if(!n)return;var s=tileSym(n.textContent);if(s)mark(el,s,n.textContent.trim())})}
+function go(el){var s=el.getAttribute('data-yf');if(!s)return;try{if(window.daTrack)window.daTrack('abrir_yahoo',{simbolo:s})}catch(e){}
+  var a=document.createElement('a');a.href=urlFor(s);a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();a.remove()}
+document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('.da-link[data-yf]');if(!el||e.target.closest('a'))return;go(el)});
+document.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var el=e.target.closest&&e.target.closest('.da-link[data-yf]');if(!el)return;e.preventDefault();go(el)});
+var t=null;function later(){clearTimeout(t);t=setTimeout(scan,60)}
+function init(){scan();if(window.MutationObserver)new MutationObserver(later).observe(document.body,{childList:true,subtree:true})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
 </body></html>
