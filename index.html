@@ -6005,4 +6005,30 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 
 <style>.card [data-pf-dv]{margin-top:2px}.card .filters:has([data-pf-dv]){margin:10px 0 2px}</style>
+<style id="da-mobile-fit">
+/* Telemóvel: o site fica sempre à largura do ecrã, sem arrastar para os lados */
+html{overflow-x:hidden}
+body{overflow-x:clip;overflow-wrap:break-word;max-width:100%}
+img,video,canvas{max-width:100%}
+@media (max-width:760px){
+  /* letra de 16px nos campos evita que o iPhone faça zoom ao escrever (o zoom obrigava a arrastar o ecrã) */
+  input,select,textarea,.in{font-size:16px!important}
+  .tip,.vtip{white-space:normal;width:max-content;max-width:min(260px,calc(100vw - 32px))}
+  .logo-name{white-space:nowrap}
+  .hero>*,.side>*,.grid>*,.grid2>*,.tiles>*,.kpis>*,.form>*,.card,.post,.featured{min-width:0}
+  pre,code{white-space:pre-wrap;word-break:break-word}
+}
+</style>
+<style id="da-mobile-top">
+@media (max-width:400px){
+  .topbar .wrap{gap:8px}
+  .logo{gap:8px;min-width:0}
+  .logo-name{font-size:18px}
+  .logo-mark{width:30px;height:30px;font-size:18px;border-radius:9px;flex:none}
+  .btn-story{padding:8px 12px;font-size:13px;gap:6px}
+  #acct .btn{padding:7px 10px;font-size:12.5px}
+}
+@media (max-width:345px){.topbar .logo-mark{display:none}}
+</style>
+
 </body></html>
